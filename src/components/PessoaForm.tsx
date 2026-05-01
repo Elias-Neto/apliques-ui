@@ -36,7 +36,7 @@ export function PessoaForm({
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     cpf: initialData?.cpf || "",
-    password: editMode ? "" : (initialData?.password || ""), // Senha vazia no modo edição
+    password: "",
     permissionGroups: initialData?.permissionGroups || [],
     phone: initialData?.phone || "",
   });
@@ -63,7 +63,7 @@ export function PessoaForm({
       setFormData({
         name: initialData.name || "",
         cpf: initialData.cpf || "",
-        password: editMode ? "" : (initialData.password || ""), // Senha vazia no modo edição
+        password: "",
         permissionGroups: initialData.permissionGroups || [],
         phone: initialData.phone || "",
       });

@@ -18,7 +18,7 @@ export default function Pessoas() {
   const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreate = async (data: Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleCreate = async (data: Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }) => {
     try {
       setIsSubmitting(true);
       await createPessoa(data);
@@ -43,7 +43,7 @@ export default function Pessoas() {
     setShowEditForm(true);
   };
 
-  const handleUpdate = async (data: Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleUpdate = async (data: Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }) => {
     if (!editingPessoa) return;
     
     try {

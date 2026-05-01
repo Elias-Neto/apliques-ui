@@ -38,7 +38,6 @@ export function usePessoas() {
       id: (obj.id as string) || '',
       name: (obj.name as string) || '',
       cpf: (obj.cpf as string) || '',
-      password: (obj.password as string) || '',
       permissionGroups: permissionGroups,
       phone: (obj.phone as string) || '',
       createdAt: obj.createdAt as string,
@@ -70,7 +69,7 @@ export function usePessoas() {
   }, [fetchPessoas]);
 
   // Criar nova pessoa
-  const createPessoa = async (pessoaData: Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createPessoa = async (pessoaData: Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }) => {
     try {
       const response = await api.post('/management/people', pessoaData);
       const normalizedData = normalizePessoa(response.data);
@@ -84,7 +83,7 @@ export function usePessoas() {
   };
 
   // Atualizar pessoa
-  const updatePessoa = async (id: string, pessoaData: Partial<Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'>>) => {
+  const updatePessoa = async (id: string, pessoaData: Partial<Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }>) => {
     try {
       const response = await api.put(`/management/people/${id}`, pessoaData);
       const normalizedData = normalizePessoa(response.data);

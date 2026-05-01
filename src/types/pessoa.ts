@@ -2,7 +2,6 @@ interface Pessoa {
   id: string
   name: string
   cpf: string
-  password: string
   permissionGroups: GrupoPermissao[]
   phone?: string
   createdAt?: string

@@ -7,7 +7,6 @@ import { createTenant } from "@/services/tenants/tenants";
 import { createSession } from "@/services/sessions/sessions";
 import { useToast } from "@/hooks/toast/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import bcrypt from "bcryptjs";
 import { TypeCreateTenantPayload } from "@/types/tenants";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -91,10 +90,6 @@ export default function AccountCreate() {
     setLoading(true);
     
     try {
-      // Criptografa a senha antes de enviar
-      const hashedPassword = await bcrypt.hash(tenant.ownerPassword, 10);
-      
-      // Estrutura nova do payload conforme o schema
       const payload: TypeCreateTenantPayload = {
         company: {
           name: tenant.companyName,
@@ -104,7 +99,7 @@ export default function AccountCreate() {
           name: tenant.ownerName,
           phone: tenant.ownerPhone,
           cpf: tenant.ownerCpf,
-          password: hashedPassword,
+          password: tenant.ownerPassword,
         },
       };
       
