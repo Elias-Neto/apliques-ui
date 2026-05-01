@@ -1,10 +1,10 @@
 import { api } from "@/services/http"
-import { GrupoPermissao } from "@/features/pessoa/types/pessoa"
+import { GrupoPermissao } from "@/features/pessoa/pessoa.types"
 import {
   PermissionsResponse,
   ModuleType,
   UpdatePermissionGroupPayload,
-} from "../types/permission-group"
+} from "./permission-group.types"
 
 export const fetchPermissionGroups = (): Promise<GrupoPermissao[]> =>
   api.get("/management/permission-groups").then(r => r.data)

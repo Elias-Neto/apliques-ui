@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { updatePermissionGroupPermissions } from "../services/permission-groups"
+import { updatePermissionGroupPermissions } from "../permission-group.service"
 import { useToast } from "@/hooks/toast/use-toast"
-import type { ModuleType, UpdatePermissionGroupPayload } from "../types/permission-group"
+import type { ModuleType, UpdatePermissionGroupPayload } from "../permission-group.types"
 
 type Vars = {
   permissionGroupId: string

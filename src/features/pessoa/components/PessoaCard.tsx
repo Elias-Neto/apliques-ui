@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Edit, Trash2 } from "lucide-react"
-import { Pessoa } from "@/features/pessoa/types/pessoa"
+import { Pessoa } from "@/features/pessoa/pessoa.types"
 import { useFetchPessoa } from "@/features/pessoa/hooks/use-fetch-pessoa"
 
 interface PessoaCardProps {

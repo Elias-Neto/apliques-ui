@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Heading } from "@/components/ui/heading"
@@ -7,7 +7,13 @@ import { Switch } from "@/components/ui/switch"
 import { PermissionGroupCollapsible } from "@/features/permission-group/components/PermissionGroupCollapsible"
 import { useFetchPermissionsByModule } from "@/features/permission-group/hooks/use-fetch-permissions-by-module"
 import { useUpdatePermissionGroupPermissions } from "@/features/permission-group/hooks/use-update-permission-group-permissions"
-import { ModuleType, PermissionGroup } from "@/features/permission-group/types/permission-group"
+import { ModuleType } from "@/features/permission-group/permission-group.types"
+import {
+  getModuleActiveValue,
+  getPermissionValue,
+  groupPermissionsByContext,
+  buildPermissionUpdatesPerGroup,
+} from "@/features/permission-group/permission-group.helpers"
 import { Module } from "@/types/enums"
 import { Save, X, Settings as SettingsIcon } from "lucide-react"
 
@@ -20,7 +26,6 @@ export default function Settings() {
   const [moduleActiveChanges, setModuleActiveChanges] = useState<Record<string, boolean>>({})
   const [hasChanges, setHasChanges] = useState(false)
 
-  // Resetar alterações pendentes quando mudar de módulo
   useEffect(() => {
     setPendingChanges({})
     setModuleActiveChanges({})
@@ -33,23 +38,9 @@ export default function Settings() {
 
   const handlePermissionToggle = (groupId: string, permissionId: string, originalValue: boolean) => {
     const key = `${groupId}-${permissionId}`
-    const currentDisplayValue = getPermissionValue(groupId, permissionId, originalValue)
+    const currentDisplayValue = getPermissionValue(pendingChanges, groupId, permissionId, originalValue)
     const newValue = !currentDisplayValue
-    
-    setPendingChanges(prev => {
-      const newChanges = { ...prev }
-      
-      // Se o novo valor é igual ao original, remover das alterações pendentes
-      if (newValue === originalValue) {
-        delete newChanges[key]
-      } else {
-        newChanges[key] = newValue
-      }
-      
-      return newChanges
-    })
-    
-    // Atualizar hasChanges baseado se ainda há alterações pendentes
+
     setPendingChanges(current => {
       const updatedChanges = { ...current }
       if (newValue === originalValue) {
@@ -63,23 +54,9 @@ export default function Settings() {
   }
 
   const handleModuleActiveToggle = (groupId: string, originalValue: boolean) => {
-    const currentValue = getModuleActiveValue(groupId, originalValue)
+    const currentValue = getModuleActiveValue(moduleActiveChanges, groupId, originalValue)
     const newValue = !currentValue
 
-    setModuleActiveChanges(prev => {
-      const newChanges = { ...prev }
-      
-      // Se o novo valor é igual ao original, remover das alterações pendentes
-      if (newValue === originalValue) {
-        delete newChanges[groupId]
-      } else {
-        newChanges[groupId] = newValue
-      }
-      
-      return newChanges
-    })
-
-    // Atualizar hasChanges
     setModuleActiveChanges(current => {
       const updatedChanges = { ...current }
       if (newValue === originalValue) {
@@ -92,15 +69,6 @@ export default function Settings() {
     })
   }
 
-  const getModuleActiveValue = (groupId: string, originalValue: boolean) => {
-    return moduleActiveChanges[groupId] !== undefined ? moduleActiveChanges[groupId] : originalValue
-  }
-
-  const getPermissionValue = (groupId: string, permissionId: string, originalValue: boolean) => {
-    const key = `${groupId}-${permissionId}`
-    return pendingChanges[key] !== undefined ? pendingChanges[key] : originalValue
-  }
-
   const handleCancelChanges = () => {
     setPendingChanges({})
     setModuleActiveChanges({})
@@ -110,67 +78,14 @@ export default function Settings() {
   const handleApplyChanges = async () => {
     if (!permissions || (Object.keys(pendingChanges).length === 0 && Object.keys(moduleActiveChanges).length === 0)) return
 
-    // Preparar payload para cada grupo que teve alterações
-    const groupUpdates: Record<string, Array<{ permission: string; active: boolean }>> = {}
-
-    Object.entries(pendingChanges).forEach(([key, active]) => {
-      // Separar apenas pelo primeiro '-' para preservar hífens no nome da permissão
-      const firstDashIndex = key.indexOf('-')
-      const groupId = key.substring(0, firstDashIndex)
-      const permission = key.substring(firstDashIndex + 1)
-      
-      if (!groupUpdates[groupId]) {
-        groupUpdates[groupId] = []
-      }
-      groupUpdates[groupId].push({ permission, active })
+    const updates = buildPermissionUpdatesPerGroup({
+      pendingChanges,
+      moduleActiveChanges,
+      permissions,
+      selectedModule,
     })
 
-    const allGroupsToUpdate = new Set([
-      ...Object.keys(groupUpdates),
-      ...Object.keys(moduleActiveChanges)
-    ])
-
-    for (const groupId of allGroupsToUpdate) {
-      const group = permissions.permissionGroups.find(g => g.id === groupId)
-      if (!group) continue
-
-      const permissionUpdates = groupUpdates[groupId] || []
-      const updatedPermissionsMap = new Map(
-        permissionUpdates.map(p => [p.permission, p.active])
-      )
-
-      const contexts = permissions.contexts.map(context => {
-        const contextPermissions: Array<{ permission: string; active: boolean }> = []
-
-        group.permissions.forEach(perm => {
-          if (perm.permission.startsWith(`${context.context}.`)) {
-            const isUpdated = updatedPermissionsMap.has(perm.permission)
-            const active = isUpdated ? updatedPermissionsMap.get(perm.permission)! : perm.active
-
-            const fullPermission = perm.permission.startsWith(`${selectedModule}.`)
-              ? perm.permission
-              : `${selectedModule}.${perm.permission}`
-
-            contextPermissions.push({ permission: fullPermission, active })
-          }
-        })
-
-        return {
-          context: context.context,
-          permissions: contextPermissions
-        }
-      }).filter(ctx => ctx.permissions.length > 0)
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const payload: any = {
-        module: selectedModule,
-        contexts
-      }
-
-      if (moduleActiveChanges[groupId] !== undefined) {
-        payload.active = moduleActiveChanges[groupId]
-      }
-
+    for (const { groupId, payload } of updates) {
       await updatePermissions({ permissionGroupId: groupId, payload, module: selectedModule })
     }
 
@@ -179,7 +94,11 @@ export default function Settings() {
     setHasChanges(false)
   }
 
-  const getModuleLabel = (module: ModuleType) => module
+  const boundGetPermissionValue = useCallback(
+    (groupId: string, permissionId: string, originalValue: boolean) =>
+      getPermissionValue(pendingChanges, groupId, permissionId, originalValue),
+    [pendingChanges],
+  )
 
   if (error) {
     return (
@@ -198,66 +117,15 @@ export default function Settings() {
     )
   }
 
-  const getPermissionLabel = (permission: string) => {
-    const contextId = permission.split('.')[0]
-    
-    const context = permissions.contexts.find(context => context.context === contextId)
-
-    const permissionLabel = context?.permissions.find(p => p.permission === permission)?.label
-
-    return permissionLabel
-  }
-
-  // Agrupar permissões por contexto
-  const getPermissionsByContext = () => {
-    if (!permissions) return []
-
-    const contextGroups = permissions.contexts.map(context => {
-      // Encontrar todas as permissões deste contexto em todos os grupos
-      const contextPermissions: Array<{
-        groupId: string
-        groupLabel: string
-        permission: string
-        label: string
-        active: boolean
-      }> = []
-
-      permissions.permissionGroups.forEach(group => {
-        group.permissions.forEach(permission => {
-          if (permission.permission.startsWith(`${context.context}.`)) {
-            const permissionLabel = context.permissions.find(p => p.permission === permission.permission)?.label
-            if (permissionLabel) {
-              contextPermissions.push({
-                groupId: group.id,
-                groupLabel: group.label,
-                permission: permission.permission,
-                label: permissionLabel,
-                active: permission.active
-              })
-            }
-          }
-        })
-      })
-
-      return {
-        context: context.context,
-        label: context.label,
-        permissions: contextPermissions
-      }
-    }).filter(context => context.permissions.length > 0)
-
-    return contextGroups
-  }
-
   return (
     <div className="min-h-screen bg-background">
-      <Heading 
+      <Heading
         description="Gerencie as permissões dos grupos de usuários"
         showButton={false}
       >
         Permissionamento
       </Heading>
-      
+
       <div className="container mx-auto px-4 py-6 space-y-8">
 
       {/* Seletor de Módulo */}
@@ -307,7 +175,7 @@ export default function Settings() {
         <>
           {/* Estado Ativo do Módulo por Grupo */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Módulo de {getModuleLabel(selectedModule)}</h2>
+            <h2 className="text-lg font-semibold mb-4">Módulo de {selectedModule}</h2>
             <div className="space-y-3">
               {permissions?.permissionGroups.map((group) => (
                 <div key={group.id} className="flex items-center justify-between py-2">
@@ -316,7 +184,7 @@ export default function Settings() {
                   </label>
                   <Switch
                     id={`module-active-${group.id}`}
-                    checked={getModuleActiveValue(group.id, group.moduleActive)}
+                    checked={getModuleActiveValue(moduleActiveChanges, group.id, group.moduleActive)}
                     onCheckedChange={() => handleModuleActiveToggle(group.id, group.moduleActive)}
                   />
                 </div>
@@ -326,12 +194,12 @@ export default function Settings() {
 
           {/* Grupos de Permissões Colapsáveis */}
           <div className="space-y-6">
-            {getPermissionsByContext().map((contextGroup) => (
+            {permissions && groupPermissionsByContext(permissions).map((contextGroup) => (
               <PermissionGroupCollapsible
                 key={contextGroup.context}
                 contextLabel={contextGroup.label}
                 permissions={contextGroup.permissions}
-                getPermissionValue={getPermissionValue}
+                getPermissionValue={boundGetPermissionValue}
                 onPermissionToggle={handlePermissionToggle}
                 defaultExpanded={false}
               />
@@ -343,7 +211,7 @@ export default function Settings() {
             <div className="fixed bottom-0 left-0 right-0 z-50">
               <div className="bg-white/95 backdrop-blur-sm border-t border-gray-200 p-4 shadow-xl">
                 <div className="flex gap-3 justify-center max-w-md mx-auto">
-                  <Button 
+                  <Button
                     onClick={handleCancelChanges}
                     variant="outline"
                     size="lg"
@@ -352,7 +220,7 @@ export default function Settings() {
                     <X className="h-4 w-4 mr-2" />
                     Cancelar
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleApplyChanges}
                     size="lg"
                     className="shadow-sm"
@@ -369,4 +237,4 @@ export default function Settings() {
       </div>
     </div>
   )
-} 
+}

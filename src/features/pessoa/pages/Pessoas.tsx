@@ -8,8 +8,8 @@ import { useFetchPessoas } from "@/features/pessoa/hooks/use-fetch-pessoas"
 import { useCreatePessoa } from "@/features/pessoa/hooks/use-create-pessoa"
 import { useUpdatePessoa } from "@/features/pessoa/hooks/use-update-pessoa"
 import { useDeletePessoa } from "@/features/pessoa/hooks/use-delete-pessoa"
-import { TypePessoaCreateForm, TypePessoaUpdateForm } from "@/features/pessoa/schemas/pessoa"
-import { Pessoa } from "@/features/pessoa/types/pessoa"
+import { TypePessoaCreateForm, TypePessoaUpdateForm } from "@/features/pessoa/pessoa.schema"
+import { Pessoa } from "@/features/pessoa/pessoa.types"
 import { Users } from "lucide-react"
 
 export default function Pessoas() {

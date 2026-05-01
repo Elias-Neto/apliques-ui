@@ -1,6 +1,6 @@
 import { api } from "@/services/http"
-import { Pessoa } from "../types/pessoa"
-import { TypePessoaCreateForm, TypePessoaUpdateForm } from "../schemas/pessoa"
+import { Pessoa } from "./pessoa.types"
+import { TypePessoaCreateForm, TypePessoaUpdateForm } from "./pessoa.schema"
 
 export const fetchPessoas = (): Promise<Pessoa[]> =>
   api.get("/management/people").then(r => r.data)

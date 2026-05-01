@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Download, RefreshCw, WifiOff } from "lucide-react";
 import { usePWA } from "@/hooks/use-pwa";
 
 export const PWANotification = () => {

@@ -7,7 +7,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function usePWA() {
   const [needRefresh, setNeedRefresh] = useState(false);
-  const [offlineReady, setOfflineReady] = useState(false);
+  const [offlineReady] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchPessoaById } from "../services/pessoas"
+import { fetchPessoaById } from "../pessoa.service"
 
 export const useFetchPessoa = (id: string | null) =>
   useQuery({

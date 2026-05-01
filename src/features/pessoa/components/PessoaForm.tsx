@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pessoa } from "@/features/pessoa/types/pessoa"
+import { Pessoa } from "@/features/pessoa/pessoa.types"
 import { useFetchPermissionGroups } from "@/features/permission-group/hooks/use-fetch-permission-groups"
 import { formatCPF, formatPhone } from "@/lib/masks"
 import {
   pessoaCreateSchema,
   pessoaUpdateSchema,
   TypePessoaCreateForm,
-} from "@/features/pessoa/schemas/pessoa"
+} from "@/features/pessoa/pessoa.schema"
 
 interface PessoaFormProps {
   initialData?: Partial<Pessoa>

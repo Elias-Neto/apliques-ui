@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchPermissionGroups } from "../services/permission-groups"
+import { fetchPermissionGroups } from "../permission-group.service"
 
 export const useFetchPermissionGroups = () =>
   useQuery({ queryKey: ["permission-groups"], queryFn: fetchPermissionGroups })

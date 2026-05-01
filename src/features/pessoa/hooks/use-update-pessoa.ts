@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { updatePessoa } from "../services/pessoas"
-import { TypePessoaUpdateForm } from "../schemas/pessoa"
+import { updatePessoa } from "../pessoa.service"
+import { TypePessoaUpdateForm } from "../pessoa.schema"
 import { useToast } from "@/hooks/toast/use-toast"
 
 type Vars = { id: string; data: TypePessoaUpdateForm }

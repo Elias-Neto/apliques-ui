@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { fetchPermissionsByModule } from "../services/permission-groups"
-import type { ModuleType } from "../types/permission-group"
+import { fetchPermissionsByModule } from "../permission-group.service"
+import type { ModuleType } from "../permission-group.types"
 
 export const useFetchPermissionsByModule = (module: ModuleType) =>
   useQuery({

@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Calculator, Smartphone, TrendingUp, FileText, DollarSign, MessageCircle, ClipboardList, Settings } from "lucide-react";
+import { Calculator, Smartphone, TrendingUp, FileText, MessageCircle, ClipboardList, Settings } from "lucide-react";
 
 const LandingPage = () => {
   const navigate = useNavigate();
