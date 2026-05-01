@@ -29,11 +29,6 @@ export type PermissionsResponse = {
 // preencher por cliente (ver `enum Module` em ./enums.ts)
 export type ModuleType = string;
 
-export type UpdatePermissionsPayload = {
-  permissionGroupId: string;
-  permissions: PermissionGroupPermission[];
-};
-
 export type UpdatePermissionGroupContext = {
   context: string;
   permissions: PermissionGroupPermission[];

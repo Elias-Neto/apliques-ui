@@ -8,7 +8,7 @@ import { useFetchPessoas } from "@/features/pessoa/hooks/use-fetch-pessoas"
 import { useCreatePessoa } from "@/features/pessoa/hooks/use-create-pessoa"
 import { useUpdatePessoa } from "@/features/pessoa/hooks/use-update-pessoa"
 import { useDeletePessoa } from "@/features/pessoa/hooks/use-delete-pessoa"
-import { TypePessoaPayload } from "@/features/pessoa/services/pessoas"
+import { TypePessoaCreateForm, TypePessoaUpdateForm } from "@/features/pessoa/schemas/pessoa"
 import { Pessoa } from "@/features/pessoa/types/pessoa"
 import { Users } from "lucide-react"
 
@@ -22,7 +22,7 @@ export default function Pessoas() {
   const [showEditForm, setShowEditForm] = useState(false)
   const [editingPessoa, setEditingPessoa] = useState<Pessoa | null>(null)
 
-  const handleCreate = (data: TypePessoaPayload) => {
+  const handleCreate = (data: TypePessoaCreateForm) => {
     createMutate(data, {
       onSuccess: () => setShowCreateForm(false),
     })
@@ -33,9 +33,12 @@ export default function Pessoas() {
     setShowEditForm(true)
   }
 
-  const handleUpdate = (data: TypePessoaPayload) => {
+  const handleUpdate = (data: TypePessoaCreateForm) => {
     if (!editingPessoa) return
-    updateMutate({ id: editingPessoa.id, data }, {
+    const payload: TypePessoaUpdateForm = data.password
+      ? data
+      : { ...data, password: undefined }
+    updateMutate({ id: editingPessoa.id, data: payload }, {
       onSuccess: () => {
         setShowEditForm(false)
         setEditingPessoa(null)

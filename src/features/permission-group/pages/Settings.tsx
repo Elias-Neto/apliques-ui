@@ -125,72 +125,58 @@ export default function Settings() {
       groupUpdates[groupId].push({ permission, active })
     })
 
-    try {
-      // Aplicar alterações para cada grupo
-      const allGroupsToUpdate = new Set([
-        ...Object.keys(groupUpdates),
-        ...Object.keys(moduleActiveChanges)
-      ])
+    const allGroupsToUpdate = new Set([
+      ...Object.keys(groupUpdates),
+      ...Object.keys(moduleActiveChanges)
+    ])
 
-      for (const groupId of allGroupsToUpdate) {
-        // Encontrar o grupo para obter suas permissões completas
-        const group = permissions.permissionGroups.find(g => g.id === groupId)
-        if (!group) continue
+    for (const groupId of allGroupsToUpdate) {
+      const group = permissions.permissionGroups.find(g => g.id === groupId)
+      if (!group) continue
 
-        const permissionUpdates = groupUpdates[groupId] || []
+      const permissionUpdates = groupUpdates[groupId] || []
+      const updatedPermissionsMap = new Map(
+        permissionUpdates.map(p => [p.permission, p.active])
+      )
 
-        // Criar mapa de permissões atualizadas
-        const updatedPermissionsMap = new Map(
-          permissionUpdates.map(p => [p.permission, p.active])
-        )
+      const contexts = permissions.contexts.map(context => {
+        const contextPermissions: Array<{ permission: string; active: boolean }> = []
 
-        // Usar a mesma estrutura de contextos que vem do GET
-        const contexts = permissions.contexts.map(context => {
-          // Encontrar todas as permissões deste contexto para este grupo
-          const contextPermissions: Array<{ permission: string; active: boolean }> = []
+        group.permissions.forEach(perm => {
+          if (perm.permission.startsWith(`${context.context}.`)) {
+            const isUpdated = updatedPermissionsMap.has(perm.permission)
+            const active = isUpdated ? updatedPermissionsMap.get(perm.permission)! : perm.active
 
-          group.permissions.forEach(perm => {
-            // Verificar se esta permissão pertence a este contexto
-            if (perm.permission.startsWith(`${context.context}.`)) {
-              const isUpdated = updatedPermissionsMap.has(perm.permission)
-              const active = isUpdated ? updatedPermissionsMap.get(perm.permission)! : perm.active
-              
-              // Adicionar prefixo do módulo se não existir
-              const fullPermission = perm.permission.startsWith(`${selectedModule}.`) 
-                ? perm.permission 
-                : `${selectedModule}.${perm.permission}`
-              
-              contextPermissions.push({ permission: fullPermission, active })
-            }
-          })
+            const fullPermission = perm.permission.startsWith(`${selectedModule}.`)
+              ? perm.permission
+              : `${selectedModule}.${perm.permission}`
 
-          return {
-            context: context.context, // Usar o contexto exato que vem do GET
-            permissions: contextPermissions
+            contextPermissions.push({ permission: fullPermission, active })
           }
-        }).filter(ctx => ctx.permissions.length > 0) // Só incluir contextos que têm permissões
+        })
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const payload: any = {
-          module: selectedModule,
-          contexts
+        return {
+          context: context.context,
+          permissions: contextPermissions
         }
+      }).filter(ctx => ctx.permissions.length > 0)
 
-        // Adicionar o campo active se houver alteração para este grupo
-        if (moduleActiveChanges[groupId] !== undefined) {
-          payload.active = moduleActiveChanges[groupId]
-        }
-
-        await updatePermissions({ permissionGroupId: groupId, payload, module: selectedModule })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = {
+        module: selectedModule,
+        contexts
       }
 
-      // Limpar alterações pendentes após sucesso
-      setPendingChanges({})
-      setModuleActiveChanges({})
-      setHasChanges(false)
-    } catch (err) {
-      console.error('Erro ao aplicar alterações:', err)
+      if (moduleActiveChanges[groupId] !== undefined) {
+        payload.active = moduleActiveChanges[groupId]
+      }
+
+      await updatePermissions({ permissionGroupId: groupId, payload, module: selectedModule })
     }
+
+    setPendingChanges({})
+    setModuleActiveChanges({})
+    setHasChanges(false)
   }
 
   const getModuleLabel = (module: ModuleType) => module

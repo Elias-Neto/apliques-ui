@@ -47,13 +47,14 @@ export function PessoaCard({ pessoa, onEdit, onDelete }: PessoaCardProps) {
               size="sm"
               onClick={() => onEdit(pessoa)}
               title="Editar"
+              aria-label={`Editar ${pessoa.name}`}
             >
               <Edit className="h-4 w-4" />
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" title="Excluir">
+                <Button variant="destructive" size="sm" title="Excluir" aria-label={`Excluir ${pessoa.name}`}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>

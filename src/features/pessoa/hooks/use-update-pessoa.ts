@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { updatePessoa, TypePessoaPayload } from "../services/pessoas"
+import { updatePessoa } from "../services/pessoas"
+import { TypePessoaUpdateForm } from "../schemas/pessoa"
 import { useToast } from "@/hooks/toast/use-toast"
 
-type Vars = { id: string; data: Partial<TypePessoaPayload> }
+type Vars = { id: string; data: TypePessoaUpdateForm }
 
 export const useUpdatePessoa = () => {
   const qc = useQueryClient()
