@@ -1,4 +1,12 @@
+import { Module } from "@/types/enums"
 import type { PermissionsResponse, UpdatePermissionGroupPayload } from "./permission-group.types"
+
+const MODULE_LABELS: Record<string, string> = {
+  [Module.Management]: 'Configurações',
+}
+
+export const getModuleLabel = (moduleValue: string): string =>
+  MODULE_LABELS[moduleValue] ?? moduleValue
 
 export const getModuleActiveValue = (
   moduleActiveChanges: Record<string, boolean>,

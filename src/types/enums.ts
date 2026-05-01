@@ -3,7 +3,8 @@ enum UserRole {
   USER = "user",
 }
 
-// preencher por cliente
-enum Module {}
+enum Module {
+  Management = 'management',
+}
 
 export { UserRole, Module }

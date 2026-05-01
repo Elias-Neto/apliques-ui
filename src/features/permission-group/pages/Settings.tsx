@@ -13,6 +13,7 @@ import {
   getPermissionValue,
   groupPermissionsByContext,
   buildPermissionUpdatesPerGroup,
+  getModuleLabel,
 } from "@/features/permission-group/permission-group.helpers"
 import { Module } from "@/types/enums"
 import { Save, X, Settings as SettingsIcon } from "lucide-react"
@@ -144,7 +145,7 @@ export default function Settings() {
               <SelectContent>
                 {Object.values(Module).map((moduleValue) => (
                   <SelectItem key={moduleValue as string} value={moduleValue as string}>
-                    {moduleValue as string}
+                    {getModuleLabel(moduleValue as string)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -175,7 +176,7 @@ export default function Settings() {
         <>
           {/* Estado Ativo do Módulo por Grupo */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Módulo de {selectedModule}</h2>
+            <h2 className="text-lg font-semibold mb-4">Módulo de {getModuleLabel(selectedModule)}</h2>
             <div className="space-y-3">
               {permissions?.permissionGroups.map((group) => (
                 <div key={group.id} className="flex items-center justify-between py-2">
