@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useRef } from "react";
-import { getMe, MeResponse } from "@/services/me/me";
+import { getMe, MeResponse } from "@/features/auth/services/me";
 
 interface UserContextType {
   user: MeResponse | null;
