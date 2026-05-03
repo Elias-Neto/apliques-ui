@@ -29,16 +29,21 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    // Se receber erro 401 (Unauthorized), limpa o token e redireciona para login
     if (error.response?.status === 401) {
       localStorage.removeItem("token")
-      
-      // Redireciona para login apenas se não estiver já na página de login
       if (window.location.pathname !== "/login" && window.location.pathname !== "/") {
         window.location.href = "/login"
       }
     }
-    
+
+    if (
+      error.response?.status === 402 &&
+      error.response?.data?.code === 'TenantSuspended' &&
+      window.location.pathname !== "/minha-mensalidade"
+    ) {
+      window.location.href = "/minha-mensalidade"
+    }
+
     return Promise.reject(error)
   }
 )

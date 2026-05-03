@@ -56,7 +56,7 @@ export default function AccountCreate() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="companyCnpj">CNPJ da empresa</Label>
+            <Label htmlFor="companyCnpj">CNPJ da empresa (opcional)</Label>
             <Input
               id="companyCnpj"
               value={companyCnpj}

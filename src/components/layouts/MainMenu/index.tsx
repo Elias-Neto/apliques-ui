@@ -8,7 +8,9 @@ import {
   ChevronRight,
   Settings,
   LogOut,
-  Home as HomeIcon,
+  User,
+  CreditCard,
+  LayoutDashboard,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
@@ -17,13 +19,19 @@ import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useUser } from "@/contexts/UserContext";
 import { MenuItem, MenuSection } from "./components";
 import { MainMenuProps } from "./types";
+import { Permission } from "@/types/enums";
+import { domainSections } from "@/config/nav";
 
 export function MainMenu({ className }: MainMenuProps) {
   const { isOpen, setIsOpen, isCollapsed, setIsCollapsed } = useMenu();
   const location = useLocation();
   const { isAtTop } = useScrollDirection();
-  const { isLoading } = useUser();
+  const { isLoading, user } = useUser();
   const { logout } = useAuth();
+
+  const permissions: string[] = user?.permissions ?? [];
+  const canSeeMinhaMensalidade = permissions.includes(Permission.BillingMeShow);
+  const canSeeBillingAdmin = permissions.includes(Permission.BillingAdminList);
 
   // Fechar o menu quando mudar de página
   useEffect(() => {
@@ -132,20 +140,56 @@ export function MainMenu({ className }: MainMenuProps) {
                   <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                 </div>
               ) : (
-                <MenuSection title="Início" isCollapsed={isCollapsed}>
-                  <MenuItem href="/home" icon={<HomeIcon className="h-full w-full" />} isCollapsed={isCollapsed}>
-                    Home
-                  </MenuItem>
-                </MenuSection>
+                <>
+                  <MenuSection title="Início" isCollapsed={isCollapsed}>
+                    <MenuItem href="/home" icon={<User className="h-full w-full" />} isCollapsed={isCollapsed}>
+                      Painel
+                    </MenuItem>
+                  </MenuSection>
+
+                  {domainSections.map(section => (
+                    <MenuSection key={section.label} title={section.label} isCollapsed={isCollapsed}>
+                      {section.items.map(item => (
+                        <MenuItem
+                          key={item.href}
+                          href={item.href}
+                          icon={<item.icon className="h-full w-full" />}
+                          isCollapsed={isCollapsed}
+                        >
+                          {item.label}
+                        </MenuItem>
+                      ))}
+                    </MenuSection>
+                  ))}
+
+                  <MenuSection title="Minha Conta" isCollapsed={isCollapsed}>
+                    <MenuItem href="/minha-conta/meus-dados" icon={<User className="h-full w-full" />} isCollapsed={isCollapsed}>
+                      Meus dados
+                    </MenuItem>
+                    {canSeeMinhaMensalidade && (
+                      <MenuItem href="/minha-mensalidade" icon={<CreditCard className="h-full w-full" />} isCollapsed={isCollapsed}>
+                        Minha mensalidade
+                      </MenuItem>
+                    )}
+                  </MenuSection>
+
+                  {canSeeBillingAdmin && (
+                    <MenuSection title="Plataforma" isCollapsed={isCollapsed}>
+                      <MenuItem href="/admin/billing" icon={<LayoutDashboard className="h-full w-full" />} isCollapsed={isCollapsed}>
+                        Billing
+                      </MenuItem>
+                    </MenuSection>
+                  )}
+                </>
               )}
             </div>
 
-            {/* Divider e Configurações */}
+            {/* Minha Empresa (fixo no rodapé) */}
             <div className="border-t">
               <div className="p-4">
-                <MenuSection title="Configurações" isCollapsed={isCollapsed}>
+                <MenuSection title="Minha Empresa" isCollapsed={isCollapsed}>
                   <MenuItem href="/configuracoes/permissionamento" icon={<Settings className="h-full w-full" />} isCollapsed={isCollapsed}>
-                    Permissionamento
+                    Permissões
                   </MenuItem>
                   <MenuItem href="/pessoas" icon={<UserCheck className="h-full w-full" />} isCollapsed={isCollapsed}>
                     Pessoas

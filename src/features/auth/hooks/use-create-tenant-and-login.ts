@@ -9,7 +9,7 @@ export const useCreateTenantAndLogin = () => {
   return useMutation({
     mutationFn: async (data: TypeAccountCreateForm) => {
       await createTenant({
-        company: { name: data.companyName, cnpj: data.companyCnpj },
+        company: { name: data.companyName, ...(data.companyCnpj ? { cnpj: data.companyCnpj } : {}) },
         owner: {
           name: data.ownerName,
           phone: data.ownerPhone,

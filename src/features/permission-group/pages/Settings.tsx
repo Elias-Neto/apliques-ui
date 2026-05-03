@@ -107,7 +107,7 @@ export default function Settings() {
         <div className="flex items-center gap-2">
           <SettingsIcon className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-4xl font-bold">Permissionamento</h1>
+            <h1 className="text-4xl font-bold">Permissões</h1>
             <p className="text-muted-foreground">Gerencie as permissões dos grupos de usuários</p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function Settings() {
         description="Gerencie as permissões dos grupos de usuários"
         showButton={false}
       >
-        Permissionamento
+        Permissões
       </Heading>
 
       <div className="container mx-auto px-4 py-6 space-y-8">
