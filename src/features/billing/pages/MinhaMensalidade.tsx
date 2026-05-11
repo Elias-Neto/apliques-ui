@@ -1,11 +1,13 @@
 import { CheckCircle, AlertCircle, Clock } from "lucide-react"
 import { useSubscription } from "../hooks/use-subscription"
 import { useCurrentCharge } from "../hooks/use-current-charge"
-import { PixQrDisplay } from "../components/PixQrDisplay"
+import { PixKeyDisplay } from "@/components/billing/PixKeyDisplay"
 import { Heading } from "@/components/ui/heading"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDate } from "@/lib/date-utils"
 import type { TypeCharge, TypeChargePreview } from "../billing.types"
+
+const PIX_KEY = "13541352450"
 
 const isCharge = (data: TypeCharge | TypeChargePreview | undefined): data is TypeCharge =>
   !!data && 'chargeID' in data
@@ -51,6 +53,10 @@ export default function MinhaMensalidade() {
         currency: 'BRL',
       })
     : null
+
+  const showPixKey =
+    !chargeLoading && isCharge(chargeData) &&
+    (chargeData.status === 'pending' || chargeData.status === 'failed')
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,16 +115,10 @@ export default function MinhaMensalidade() {
               <div className="border-t pt-4">
                 {chargeLoading && (
                   <p className="text-sm text-center text-muted-foreground animate-pulse">
-                    Gerando novo PIX...
+                    Carregando cobrança...
                   </p>
                 )}
-                {!chargeLoading && isCharge(chargeData) && (
-                  <PixQrDisplay
-                    brCode={chargeData.brCode}
-                    brCodeBase64={chargeData.brCodeBase64}
-                    expiresAt={chargeData.expiresAt}
-                  />
-                )}
+                {showPixKey && <PixKeyDisplay pixKey={PIX_KEY} />}
                 {!chargeLoading && isPreview(chargeData) && (
                   <div className="text-center text-sm text-muted-foreground space-y-1">
                     <p>Sua mensalidade ainda não está disponível para pagamento.</p>

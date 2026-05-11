@@ -14,8 +14,6 @@ interface TypeCharge {
   chargeID: string
   status: TypeChargeStatus
   amountCents: number
-  brCode: string
-  brCodeBase64: string
   expiresAt: string
   cycleStart: string
   cycleEnd: string
@@ -57,8 +55,6 @@ interface TypeAdminTenantsResponse {
 
 interface TypeGenerateChargeResponse {
   chargeID: string
-  brCode: string
-  brCodeBase64: string
   expiresAt: string
   amountCents: number
 }

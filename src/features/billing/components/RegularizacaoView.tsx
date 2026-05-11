@@ -1,10 +1,12 @@
 import { useSubscription } from "../hooks/use-subscription"
 import { useCurrentCharge } from "../hooks/use-current-charge"
-import { PixQrDisplay } from "./PixQrDisplay"
+import { PixKeyDisplay } from "@/components/billing/PixKeyDisplay"
 import { useAuth } from "@/features/auth/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 import type { TypeCharge } from "../billing.types"
+
+const PIX_KEY = "13541352450"
 
 const isCharge = (data: unknown): data is TypeCharge =>
   !!data && typeof data === 'object' && 'chargeID' in data
@@ -25,6 +27,8 @@ export function RegularizacaoView() {
     subscription?.daysUntilDue !== null && subscription?.daysUntilDue !== undefined && subscription.daysUntilDue < 0
       ? Math.abs(subscription.daysUntilDue)
       : null
+
+  const showPixKey = !chargeLoading && isCharge(charge)
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
@@ -48,16 +52,12 @@ export function RegularizacaoView() {
         </div>
 
         {chargeLoading && (
-          <p className="text-sm text-muted-foreground animate-pulse">Gerando novo PIX...</p>
+          <p className="text-sm text-muted-foreground animate-pulse">Carregando cobrança...</p>
         )}
 
-        {!chargeLoading && isCharge(charge) && (
-          <div className="border rounded-lg p-6 bg-card shadow-sm">
-            <PixQrDisplay
-              brCode={charge.brCode}
-              brCodeBase64={charge.brCodeBase64}
-              expiresAt={charge.expiresAt}
-            />
+        {showPixKey && (
+          <div className="border rounded-lg p-6 bg-card shadow-sm text-left">
+            <PixKeyDisplay pixKey={PIX_KEY} />
           </div>
         )}
 
