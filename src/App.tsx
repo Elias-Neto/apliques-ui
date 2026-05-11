@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -20,7 +21,19 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const impersonationToken = params.get('impersonation-token')
+    if (impersonationToken) {
+      sessionStorage.setItem('impersonation-token', impersonationToken)
+      params.delete('impersonation-token')
+      const newSearch = params.toString()
+      history.replaceState(null, '', `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`)
+    }
+  }, [])
+
+  return (
   <QueryClientProvider client={queryClient}>
     <Toaster />
     <BrowserRouter>
@@ -44,6 +57,7 @@ const App = () => (
     </BrowserRouter>
     <PWANotification />
   </QueryClientProvider>
-);
+  )
+}
 
 export default App;

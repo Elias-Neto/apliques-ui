@@ -13,6 +13,7 @@ import { MarkAsPaidModal } from "./MarkAsPaidModal"
 import { ChangeStatusModal } from "./ChangeStatusModal"
 import { ActivateTenantModal } from "./ActivateTenantModal"
 import { formatDate } from "@/lib/date-utils"
+import { useImpersonateTenant } from "@/hooks/platform/use-impersonate-tenant"
 import type { TypeAdminTenant } from "../billing.types"
 
 type ModalType = 'generate' | 'markPaid' | 'changeStatus' | 'activate' | null
@@ -23,6 +24,7 @@ interface TenantBillingRowProps {
 
 export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
   const [modal, setModal] = useState<ModalType>(null)
+  const { mutate: impersonate, isPending: isImpersonating } = useImpersonateTenant()
 
   const amountBrl = tenant.billingAmountCents
     ? (tenant.billingAmountCents / 100).toLocaleString('pt-BR', {
@@ -95,6 +97,12 @@ export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
                 disabled={!isPendingActivation}
               >
                 Ativar cobrança
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => impersonate(tenant.tenantID)}
+                disabled={isImpersonating}
+              >
+                Acessar como este tenant
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
