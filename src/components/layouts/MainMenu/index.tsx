@@ -11,6 +11,7 @@ import {
   User,
   CreditCard,
   LayoutDashboard,
+  Users,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
@@ -32,6 +33,7 @@ export function MainMenu({ className }: MainMenuProps) {
   const permissions: string[] = user?.permissions ?? [];
   const canSeeMinhaMensalidade = permissions.includes(Permission.BillingMeShow);
   const canSeeBillingAdmin = permissions.includes(Permission.BillingAdminList);
+  const canSeeTenantsAdmin = permissions.includes(Permission.TenantAdminList);
 
   // Fechar o menu quando mudar de página
   useEffect(() => {
@@ -173,11 +175,18 @@ export function MainMenu({ className }: MainMenuProps) {
                     )}
                   </MenuSection>
 
-                  {canSeeBillingAdmin && (
+                  {(canSeeTenantsAdmin || canSeeBillingAdmin) && (
                     <MenuSection title="Plataforma" isCollapsed={isCollapsed}>
-                      <MenuItem href="/admin/billing" icon={<LayoutDashboard className="h-full w-full" />} isCollapsed={isCollapsed}>
-                        Billing
-                      </MenuItem>
+                      {canSeeTenantsAdmin && (
+                        <MenuItem href="/admin/tenants" icon={<Users className="h-full w-full" />} isCollapsed={isCollapsed}>
+                          Tenants
+                        </MenuItem>
+                      )}
+                      {canSeeBillingAdmin && (
+                        <MenuItem href="/admin/billing" icon={<LayoutDashboard className="h-full w-full" />} isCollapsed={isCollapsed}>
+                          Billing
+                        </MenuItem>
+                      )}
                     </MenuSection>
                   )}
                 </>

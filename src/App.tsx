@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toast";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -9,7 +8,6 @@ import { UserProvider } from "@/contexts/UserContext";
 import { PWANotification } from "@/components/layouts/PWANotification";
 import Landing from "@/features/landing/pages/Landing";
 import LandingPage from "@/features/landing/pages/LandingPage";
-import AccountCreate from "@/features/auth/pages/AccountCreate";
 import Login from "@/features/auth/pages/Login";
 
 const queryClient = new QueryClient({
@@ -22,17 +20,6 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const impersonationToken = params.get('impersonation-token')
-    if (impersonationToken) {
-      sessionStorage.setItem('impersonation-token', impersonationToken)
-      params.delete('impersonation-token')
-      const newSearch = params.toString()
-      history.replaceState(null, '', `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`)
-    }
-  }, [])
-
   return (
   <QueryClientProvider client={queryClient}>
     <Toaster />
@@ -41,7 +28,6 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/landing-page" element={<LandingPage />} />
-        <Route path="/criar-conta" element={<AccountCreate />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="*"

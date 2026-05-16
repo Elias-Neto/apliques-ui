@@ -8,6 +8,7 @@ import Home from "@/features/home/pages/Home"
 import NotFound from "@/components/layouts/NotFound"
 import MinhaMensalidade from "@/features/billing/pages/MinhaMensalidade"
 import BillingAdmin from "@/features/billing/pages/BillingAdmin"
+import TenantsAdmin from "@/features/tenants-admin/pages/TenantsAdmin"
 import MeusDados from "@/features/account/pages/MeusDados"
 import { SubscriptionBanner } from "@/features/billing/components/SubscriptionBanner"
 import { RegularizacaoView } from "@/features/billing/components/RegularizacaoView"
@@ -38,6 +39,7 @@ export const ProtectedRoutesLayout = () => {
           <Route path="/configuracoes/permissionamento" element={<Settings />} />
           <Route path="/minha-mensalidade" element={<MinhaMensalidade />} />
           <Route path="/admin/billing" element={<BillingAdmin />} />
+          <Route path="/admin/tenants" element={<TenantsAdmin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

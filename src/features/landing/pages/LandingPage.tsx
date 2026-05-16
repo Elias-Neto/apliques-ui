@@ -29,20 +29,13 @@ const LandingPage = () => {
               transformando a forma como você gerencia sua confecção com tecnologia moderna e intuitiva.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button 
-                size="lg" 
-                className="px-8 py-6 text-lg font-semibold"
-                onClick={() => navigate("/criar-conta")}
-              >
-                Começar Agora
-              </Button>
-              <Button 
+              <Button
                 variant="outline"
-                size="lg" 
+                size="lg"
                 className="px-8 py-6 text-lg font-semibold"
                 onClick={() => navigate("/login")}
               >
-                Já tenho uma conta
+                Entrar
               </Button>
             </div>
           </div>
@@ -331,16 +324,8 @@ const LandingPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-              <Button 
-                size="lg" 
-                variant="secondary"
-                className="px-8 py-6 text-lg font-semibold bg-white text-blue-600 hover:bg-gray-100"
-                onClick={() => navigate("/criar-conta")}
-              >
-                Criar Conta Grátis
-              </Button>
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="outline"
                 className="px-8 py-6 text-lg font-semibold border-2 border-white bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 hover:border-white"
                 onClick={() => navigate("/login")}

@@ -71,17 +71,6 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Não tem uma conta?{" "}
-              <button
-                onClick={() => navigate("/criar-conta")}
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Criar conta
-              </button>
-            </p>
-          </div>
         </div>
       </div>
     </div>

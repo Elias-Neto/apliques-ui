@@ -48,13 +48,6 @@ const Landing = () => {
           <p className="text-xl text-gray-600 max-w-md mx-auto leading-relaxed">
             Feito para você comerciante ter o controle da sua confecção
           </p>
-          <Button 
-            size="lg" 
-            className="px-8 py-3 text-lg font-semibold"
-            onClick={() => navigate("/criar-conta")}
-          >
-            Criar Conta
-          </Button>
         </div>
       </div>
       

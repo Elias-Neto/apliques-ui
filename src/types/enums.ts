@@ -6,12 +6,20 @@ enum UserRole {
 enum Module {
   Management = 'management',
   Billing = 'billing',
+  Platform = 'platform',
 }
 
 enum Permission {
   BillingMeShow = 'billing.me.show',
-  BillingAdminList = 'billing.admin.list',
-  BillingAdminManage = 'billing.admin.manage',
+
+  // platform.billing (ADR-0003)
+  BillingAdminList = 'platform.billing.list',
+  BillingAdminManage = 'platform.billing.manage',
+
+  // platform.tenants (ADR-0003)
+  ImpersonateTenant = 'platform.tenants.impersonate',
+  TenantAdminList = 'platform.tenants.list',
+  TenantAdminCreate = 'platform.tenants.create',
 }
 
 export { UserRole, Module, Permission }
