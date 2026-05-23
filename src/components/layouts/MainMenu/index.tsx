@@ -62,7 +62,7 @@ export function MainMenu({ className }: MainMenuProps) {
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
         <Link to="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-semibold text-lg">
-          BOOTSTRAP
+          {user?.tenant.name ?? 'BOOTSTRAP'}
         </Link>
       </div>
 
@@ -100,7 +100,7 @@ export function MainMenu({ className }: MainMenuProps) {
                 <X className="h-5 w-5" />
               </button>
               <Link to="/" className="font-semibold text-lg absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                BOOTSTRAP
+                {user?.tenant.name ?? 'BOOTSTRAP'}
               </Link>
             </div>
           </div>
@@ -129,7 +129,7 @@ export function MainMenu({ className }: MainMenuProps) {
           <div className="bg-white h-14 items-center justify-center border-b hidden lg:flex">
             {!isCollapsed && (
               <Link to="/" className="font-semibold text-lg text-foreground">
-                BOOTSTRAP
+                {user?.tenant.name ?? 'BOOTSTRAP'}
               </Link>
             )}
           </div>
