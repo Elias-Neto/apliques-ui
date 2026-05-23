@@ -10,6 +10,11 @@ enum Module {
 }
 
 enum Permission {
+  // management
+  ManagementPeopleList = 'management.people.list',
+  ManagementPermissionGroupsList = 'management.permission-groups.list',
+  ManagementPermissionGroupsEdit = 'management.permission-groups.edit',
+
   BillingMeShow = 'billing.me.show',
 
   // platform.billing (ADR-0003)

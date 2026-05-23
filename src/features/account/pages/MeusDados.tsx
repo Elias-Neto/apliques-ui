@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card"
 import { Heading } from "@/components/ui/heading"
 import { useUser } from "@/contexts/UserContext"
+import { Permission } from "@/types/enums"
 
 const Field = ({ label, value }: { label: string; value: string }) => (
   <div>
@@ -29,6 +30,8 @@ export default function MeusDados() {
 
   if (!user) return null
 
+  const isAdmin = user.permissions.includes(Permission.ManagementPermissionGroupsEdit)
+
   return (
     <div className="min-h-screen bg-background">
       <Heading description="Seus dados de cadastro" showButton={false}>
@@ -41,10 +44,12 @@ export default function MeusDados() {
           <Field label="Telefone" value={user.phone ?? "—"} />
           <Field label="CPF" value={user.cpf ?? "—"} />
         </Card>
-        <Card className="p-6 space-y-4">
-          <Field label="Empresa" value={user.tenant.name} />
-          <Field label="CNPJ" value={user.tenant.cnpj || "—"} />
-        </Card>
+        {isAdmin && (
+          <Card className="p-6 space-y-4">
+            <Field label="Empresa" value={user.tenant.name} />
+            <Field label="CNPJ" value={user.tenant.cnpj || "—"} />
+          </Card>
+        )}
       </div>
     </div>
   )

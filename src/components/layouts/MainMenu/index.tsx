@@ -34,6 +34,9 @@ export function MainMenu({ className }: MainMenuProps) {
   const canSeeMinhaMensalidade = permissions.includes(Permission.BillingMeShow);
   const canSeeBillingAdmin = permissions.includes(Permission.BillingAdminList);
   const canSeeTenantsAdmin = permissions.includes(Permission.TenantAdminList);
+  const canSeePessoas = permissions.includes(Permission.ManagementPeopleList);
+  const canSeePermissoes = permissions.includes(Permission.ManagementPermissionGroupsList);
+  const canSeeMinhaEmpresa = canSeePessoas || canSeePermissoes;
 
   // Fechar o menu quando mudar de página
   useEffect(() => {
@@ -194,18 +197,24 @@ export function MainMenu({ className }: MainMenuProps) {
             </div>
 
             {/* Minha Empresa (fixo no rodapé) */}
-            <div className="border-t">
-              <div className="p-4">
-                <MenuSection title="Minha Empresa" isCollapsed={isCollapsed}>
-                  <MenuItem href="/configuracoes/permissionamento" icon={<Settings className="h-full w-full" />} isCollapsed={isCollapsed}>
-                    Permissões
-                  </MenuItem>
-                  <MenuItem href="/pessoas" icon={<UserCheck className="h-full w-full" />} isCollapsed={isCollapsed}>
-                    Pessoas
-                  </MenuItem>
-                </MenuSection>
+            {canSeeMinhaEmpresa && (
+              <div className="border-t">
+                <div className="p-4">
+                  <MenuSection title="Minha Empresa" isCollapsed={isCollapsed}>
+                    {canSeePermissoes && (
+                      <MenuItem href="/configuracoes/permissionamento" icon={<Settings className="h-full w-full" />} isCollapsed={isCollapsed}>
+                        Permissões
+                      </MenuItem>
+                    )}
+                    {canSeePessoas && (
+                      <MenuItem href="/pessoas" icon={<UserCheck className="h-full w-full" />} isCollapsed={isCollapsed}>
+                        Pessoas
+                      </MenuItem>
+                    )}
+                  </MenuSection>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Botão Sair fixo no final */}
             <div className="p-4 pt-4">
