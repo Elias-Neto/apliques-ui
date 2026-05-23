@@ -12,6 +12,7 @@ export interface MeResponse {
     name: string;
     cnpj: string;
   };
+  subscriptionStatus: string;
 }
 
 let mePromise: Promise<MeResponse> | null = null;

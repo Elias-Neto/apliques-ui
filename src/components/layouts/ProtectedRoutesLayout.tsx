@@ -13,10 +13,16 @@ import MeusDados from "@/features/account/pages/MeusDados"
 import { SubscriptionBanner } from "@/features/billing/components/SubscriptionBanner"
 import { RegularizacaoView } from "@/features/billing/components/RegularizacaoView"
 import { useSubscription } from "@/features/billing/hooks/use-subscription"
+import { useUser } from "@/contexts/UserContext"
 
 export const ProtectedRoutesLayout = () => {
   const { isCollapsed } = useMenu()
   const { data: subscription, isLoading: subLoading } = useSubscription()
+  const { user, isLoading: userLoading } = useUser()
+
+  if (!userLoading && user?.subscriptionStatus === 'suspended') {
+    return <RegularizacaoView />
+  }
 
   if (!subLoading && subscription?.subscriptionStatus === 'suspended') {
     return <RegularizacaoView />
