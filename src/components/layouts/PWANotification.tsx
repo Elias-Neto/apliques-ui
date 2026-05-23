@@ -13,9 +13,9 @@ export const PWANotification = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2">
+    <div className="fixed bottom-4 left-4 right-4 z-50 space-y-2 sm:left-auto sm:right-4 sm:w-80">
       {canInstall && !hideInstall && (
-        <Card className="w-80 shadow-lg border-primary">
+        <Card className="w-full shadow-lg border-primary">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <Download className="h-4 w-4" />
@@ -39,7 +39,7 @@ export const PWANotification = () => {
       )}
 
       {needRefresh && (
-        <Card className="w-80 shadow-lg border-yellow-500">
+        <Card className="w-full shadow-lg border-yellow-500">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
@@ -58,7 +58,7 @@ export const PWANotification = () => {
       )}
 
       {offlineReady && (
-        <Card className="w-80 shadow-lg border-green-500">
+        <Card className="w-full shadow-lg border-green-500">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <WifiOff className="h-4 w-4" />
