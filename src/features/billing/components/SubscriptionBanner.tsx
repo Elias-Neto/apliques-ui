@@ -45,7 +45,7 @@ export function SubscriptionBanner({ subscription }: SubscriptionBannerProps) {
       return (
         <span>
           Olá! Sua mensalidade vence amanhã{dataBrl ? ` (${dataBrl})` : ''}. Quando puder, dá uma
-          olhada lá em <MensalidadeLink /> — o PIX já tá pronto.
+          olhada lá em <MensalidadeLink />.
         </span>
       )
     }
@@ -62,18 +62,17 @@ export function SubscriptionBanner({ subscription }: SubscriptionBannerProps) {
       return (
         <span>
           Sua mensalidade venceu. Regularize lá em <MensalidadeLink /> — qualquer dúvida, fala com
-          o responsável no WhatsApp.
+          o Elias.
         </span>
       )
     }
 
     if (subscriptionStatus === 'overdue' && overdueDays >= 1 && overdueDays <= 6) {
-      const dono = 'o responsável'
+      const dono = 'o Elias'
       return (
         <span>
           Sua mensalidade venceu há {overdueDays} {overdueDays === 1 ? 'dia' : 'dia(s)'}. Quando
-          puder, regulariza ali em <MensalidadeLink /> — qualquer dúvida, fala com {dono} no
-          WhatsApp.
+          puder, regulariza ali em <MensalidadeLink /> — qualquer dúvida, fala com {dono}.
         </span>
       )
     }

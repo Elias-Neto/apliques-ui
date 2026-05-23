@@ -46,9 +46,6 @@ export function RegularizacaoView() {
               Em atraso há: {overdueDays} {overdueDays === 1 ? 'dia' : 'dias'}
             </p>
           )}
-          <p className="text-sm text-muted-foreground">
-            Assim que cair, libera tudo automaticamente.
-          </p>
         </div>
 
         {chargeLoading && (
@@ -68,7 +65,7 @@ export function RegularizacaoView() {
         )}
 
         <p className="text-sm text-muted-foreground">
-          Qualquer dúvida, fala com o responsável no WhatsApp.
+          Qualquer dúvida, fala com o Elias.
         </p>
 
         <Button variant="ghost" size="sm" onClick={logout} className="gap-2 text-muted-foreground">
