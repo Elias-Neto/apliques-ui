@@ -46,7 +46,7 @@ const Landing = () => {
             SONAR
           </h1>
           <p className="text-xl text-gray-600 max-w-md mx-auto leading-relaxed">
-            Feito para você comerciante ter o controle da sua confecção
+            Feito para o empreendedor do agreste pernambucano.
           </p>
         </div>
       </div>
