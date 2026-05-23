@@ -9,7 +9,7 @@ interface IPixKeyDisplayProps {
 }
 
 const WHATSAPP_URL =
-  "https://wa.me/55819989321?text=Ol%C3%A1%2C+segue+meu+comprovante+de+pagamento"
+  "https://wa.me/5581998789321?text=Ol%C3%A1%2C+segue+meu+comprovante+de+pagamento"
 
 export function PixKeyDisplay({ pixKey }: IPixKeyDisplayProps) {
   const [copied, setCopied] = useState(false)

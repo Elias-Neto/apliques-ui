@@ -7,6 +7,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CurrencyInput } from "@/components/ui/currency-input"
 import { useActivateTenantBilling } from "../hooks/use-activate-tenant-billing"
@@ -21,21 +22,24 @@ interface ActivateTenantModalProps {
 
 export function ActivateTenantModal({ tenant, open, onClose }: ActivateTenantModalProps) {
   const [amountCents, setAmountCents] = useState(0)
+  const [billingDay, setBillingDay] = useState<number | "">(1)
   const [result, setResult] = useState<TypeActivateTenantResponse | null>(null)
   const { mutate, isPending } = useActivateTenantBilling()
 
-  const canConfirm = amountCents > 0
+  const billingDayValid = billingDay !== "" && Number.isInteger(billingDay) && billingDay >= 1 && billingDay <= 28
+  const canConfirm = amountCents > 0 && billingDayValid
 
   const handleConfirm = () => {
-    if (!canConfirm) return
+    if (!canConfirm || !billingDayValid || billingDay === "") return
     mutate(
-      { tenantID: tenant.tenantID, amountCents },
+      { tenantID: tenant.tenantID, amountCents, billingDay: billingDay as number },
       { onSuccess: (data) => setResult(data) },
     )
   }
 
   const handleClose = () => {
     setAmountCents(0)
+    setBillingDay(1)
     setResult(null)
     onClose()
   }
@@ -50,8 +54,8 @@ export function ActivateTenantModal({ tenant, open, onClose }: ActivateTenantMod
         {!result ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Configure o valor da mensalidade para <strong>{tenant.name}</strong>. O primeiro
-              vencimento será em 28 dias.
+              Configure a mensalidade de <strong>{tenant.name}</strong>. A cobrança será gerada
+              todo mês no dia definido.
             </p>
             <div className="space-y-1">
               <Label htmlFor="amount">
@@ -63,6 +67,24 @@ export function ActivateTenantModal({ tenant, open, onClose }: ActivateTenantMod
                 onChange={setAmountCents}
                 placeholder="R$ 0,00"
               />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="billing-day">
+                Dia de cobrança <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="billing-day"
+                type="number"
+                min={1}
+                max={28}
+                value={billingDay}
+                onChange={e => {
+                  const v = e.target.value
+                  setBillingDay(v === "" ? "" : parseInt(v, 10))
+                }}
+                placeholder="1 – 28"
+              />
+              <p className="text-xs text-muted-foreground">Entre 1 e 28 (sem 29-31 para evitar meses curtos)</p>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>
@@ -76,8 +98,8 @@ export function ActivateTenantModal({ tenant, open, onClose }: ActivateTenantMod
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-emerald-700 font-medium">
-              Billing ativado! Primeiro vencimento:{" "}
-              <strong>{formatDate(result.nextBillingAt)}</strong>.
+              Billing ativado! Dia de cobrança: <strong>{result.billingDay}</strong>. Primeiro
+              vencimento: <strong>{formatDate(result.nextBillingAt)}</strong>.
             </p>
             <DialogFooter>
               <Button onClick={handleClose} className="w-full">

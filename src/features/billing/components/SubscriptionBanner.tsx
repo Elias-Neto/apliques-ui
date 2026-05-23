@@ -58,6 +58,15 @@ export function SubscriptionBanner({ subscription }: SubscriptionBannerProps) {
       )
     }
 
+    if (subscriptionStatus === 'overdue' && overdueDays === 0) {
+      return (
+        <span>
+          Sua mensalidade venceu. Regularize lá em <MensalidadeLink /> — qualquer dúvida, fala com
+          o responsável no WhatsApp.
+        </span>
+      )
+    }
+
     if (subscriptionStatus === 'overdue' && overdueDays >= 1 && overdueDays <= 6) {
       const dono = 'o responsável'
       return (

@@ -8,6 +8,7 @@ import type {
   TypeMarkPaidResponse,
   TypeChangeStatusResponse,
   TypeActivateTenantResponse,
+  TypeChangeBillingDayResponse,
 } from "./billing.types"
 
 export const fetchSubscription = (): Promise<TypeSubscription> =>
@@ -60,12 +61,25 @@ export const changeSubscriptionStatus = ({
 export const activateTenantBilling = ({
   tenantID,
   amountCents,
+  billingDay,
   startBillingAt,
 }: {
   tenantID: string
   amountCents: number
+  billingDay: number
   startBillingAt?: string
 }): Promise<TypeActivateTenantResponse> =>
   api
-    .post(`/admin/billing/tenants/${tenantID}/activate`, { amountCents, startBillingAt })
+    .post(`/admin/billing/tenants/${tenantID}/activate`, { amountCents, billingDay, startBillingAt })
+    .then(r => r.data)
+
+export const changeBillingDay = ({
+  tenantID,
+  billingDay,
+}: {
+  tenantID: string
+  billingDay: number
+}): Promise<TypeChangeBillingDayResponse> =>
+  api
+    .patch(`/admin/billing/tenants/${tenantID}/billing-day`, { billingDay })
     .then(r => r.data)

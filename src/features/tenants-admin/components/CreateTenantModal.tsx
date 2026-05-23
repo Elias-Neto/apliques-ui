@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { formatPhone } from '@/lib/masks'
+import { formatPhone, formatCNPJ, formatCPF } from '@/lib/masks'
 import {
   Dialog,
   DialogContent,
@@ -60,7 +60,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
       {
         company: {
           name: form.companyName.trim(),
-          cnpj: form.companyCnpj.trim() || undefined,
+          cnpj: form.companyCnpj.replace(/\D/g, '') || undefined,
         },
         owner: {
           name: form.ownerName.trim(),
@@ -80,6 +80,12 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
 
   const phoneField = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, ownerPhone: formatPhone(e.target.value) }))
+
+  const cnpjField = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(f => ({ ...f, companyCnpj: formatCNPJ(e.target.value) }))
+
+  const cpfField = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm(f => ({ ...f, ownerCpf: formatCPF(e.target.value) }))
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -108,8 +114,9 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
             <Input
               id="companyCnpj"
               value={form.companyCnpj}
-              onChange={field('companyCnpj')}
+              onChange={cnpjField}
               placeholder="00.000.000/0001-00"
+              inputMode="numeric"
             />
           </div>
 
@@ -135,8 +142,10 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
               <Input
                 id="ownerCpf"
                 value={form.ownerCpf}
-                onChange={field('ownerCpf')}
+                onChange={cpfField}
                 placeholder="000.000.000-00"
+                inputMode="numeric"
+                maxLength={14}
               />
             </div>
 

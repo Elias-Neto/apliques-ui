@@ -13,7 +13,7 @@ const isCharge = (data: unknown): data is TypeCharge =>
 
 export function RegularizacaoView() {
   const { data: subscription } = useSubscription()
-  const { data: charge, isLoading: chargeLoading } = useCurrentCharge()
+  const { data: charge, isLoading: chargeLoading } = useCurrentCharge(subscription?.subscriptionStatus)
   const { logout } = useAuth()
 
   const amountBrl = subscription?.billingAmountCents

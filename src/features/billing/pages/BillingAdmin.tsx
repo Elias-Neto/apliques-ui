@@ -51,6 +51,7 @@ export default function BillingAdmin() {
                     <th className="px-4 py-3 text-left font-medium">Nome</th>
                     <th className="px-4 py-3 text-left font-medium">Plano</th>
                     <th className="px-4 py-3 text-left font-medium">Status</th>
+                    <th className="px-4 py-3 text-left font-medium">Dia cobrança</th>
                     <th className="px-4 py-3 text-left font-medium">Próx. cobrança</th>
                     <th className="px-4 py-3 text-left font-medium">Último pagamento</th>
                     <th className="px-4 py-3 text-left font-medium">Ativado em</th>
@@ -60,7 +61,7 @@ export default function BillingAdmin() {
                 <tbody>
                   {(data?.tenants ?? []).length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                      <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                         Nenhum tenant cadastrado.
                       </td>
                     </tr>

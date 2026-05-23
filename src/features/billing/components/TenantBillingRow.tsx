@@ -12,10 +12,11 @@ import { GenerateManualChargeModal } from "./GenerateManualChargeModal"
 import { MarkAsPaidModal } from "./MarkAsPaidModal"
 import { ChangeStatusModal } from "./ChangeStatusModal"
 import { ActivateTenantModal } from "./ActivateTenantModal"
+import { ChangeBillingDayModal } from "./ChangeBillingDayModal"
 import { formatDate } from "@/lib/date-utils"
 import type { TypeAdminTenant } from "../billing.types"
 
-type ModalType = 'generate' | 'markPaid' | 'changeStatus' | 'activate' | null
+type ModalType = 'generate' | 'markPaid' | 'changeStatus' | 'activate' | 'changeBillingDay' | null
 
 interface TenantBillingRowProps {
   tenant: TypeAdminTenant
@@ -33,6 +34,7 @@ export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
 
   const isPendingActivation = tenant.subscriptionStatus === 'pending_activation'
   const canMarkPaid = !!tenant.currentPendingChargeID
+  const canChangeBillingDay = !isPendingActivation
 
   return (
     <>
@@ -48,6 +50,18 @@ export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
         <td className="px-4 py-3 text-sm text-muted-foreground">{tenant.plan}</td>
         <td className="px-4 py-3">
           <SubscriptionStatusBadge status={tenant.subscriptionStatus} />
+        </td>
+        <td className="px-4 py-3 text-sm">
+          {tenant.billingDay != null ? (
+            <span>dia {tenant.billingDay}</span>
+          ) : (
+            <span
+              className="text-amber-600"
+              title="Dia de cobrança não definido — ative o billing para configurar"
+            >
+              —
+            </span>
+          )}
         </td>
         <td className="px-4 py-3 text-sm">
           {tenant.nextBillingAt ? (
@@ -96,6 +110,12 @@ export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
               >
                 Ativar cobrança
               </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setModal('changeBillingDay')}
+                disabled={!canChangeBillingDay}
+              >
+                Mudar dia de cobrança
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </td>
@@ -125,6 +145,13 @@ export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
       )}
       {modal === 'activate' && (
         <ActivateTenantModal
+          tenant={tenant}
+          open
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal === 'changeBillingDay' && (
+        <ChangeBillingDayModal
           tenant={tenant}
           open
           onClose={() => setModal(null)}

@@ -17,7 +17,7 @@ const isPreview = (data: TypeCharge | TypeChargePreview | undefined): data is Ty
 
 export default function MinhaMensalidade() {
   const { data: subscription, isLoading: subLoading } = useSubscription()
-  const { data: chargeData, isLoading: chargeLoading } = useCurrentCharge()
+  const { data: chargeData, isLoading: chargeLoading } = useCurrentCharge(subscription?.subscriptionStatus)
 
   if (subLoading) {
     return (

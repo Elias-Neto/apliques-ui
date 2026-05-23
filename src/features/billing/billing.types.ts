@@ -33,6 +33,7 @@ interface TypeAdminTenant {
   name: string
   plan: string
   subscriptionStatus: TypeSubscriptionStatus
+  billingDay: number | null
   nextBillingAt: string | null
   billingAmountCents: number
   lastPaidAt: string | null
@@ -80,8 +81,16 @@ interface TypeActivateTenantResponse {
   tenantID: string
   subscriptionStatus: 'active'
   billingActivatedAt: string
+  billingDay: number
   nextBillingAt: string
   billingAmountCents: number
+}
+
+interface TypeChangeBillingDayResponse {
+  tenantID: string
+  billingDay: number
+  nextBillingAt: string
+  appliedFromCycle: 'next'
 }
 
 export type {
@@ -97,4 +106,5 @@ export type {
   TypeMarkPaidResponse,
   TypeChangeStatusResponse,
   TypeActivateTenantResponse,
+  TypeChangeBillingDayResponse,
 }
