@@ -16,10 +16,15 @@ import {
   getModuleLabel,
 } from "@/features/permission-group/permission-group.helpers"
 import { Module } from "@/types/enums"
+import { useSubscription } from "@/features/billing/hooks/use-subscription"
 import { Save, X, Settings as SettingsIcon } from "lucide-react"
 
 export default function Settings() {
+  const { data: subscription } = useSubscription()
   const [selectedModule, setSelectedModule] = useState<ModuleType>("")
+  const visibleModules = Object.values(Module).filter(
+    m => m !== Module.Platform || !!subscription?.isPlatformOwner,
+  )
   const { data: permissions, isLoading, error } = useFetchPermissionsByModule(selectedModule)
   const { mutateAsync: updatePermissions } = useUpdatePermissionGroupPermissions()
 
@@ -131,7 +136,7 @@ export default function Settings() {
 
       {/* Seletor de Módulo */}
       <Card className="p-6">
-        {Object.values(Module).length === 0 ? (
+        {visibleModules.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             Nenhum módulo configurado. Popular <code>Module</code> em <code>src/types/enums.ts</code> antes de usar permissionamento.
           </p>
@@ -143,7 +148,7 @@ export default function Settings() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(Module).map((moduleValue) => (
+                {visibleModules.map((moduleValue) => (
                   <SelectItem key={moduleValue as string} value={moduleValue as string}>
                     {getModuleLabel(moduleValue as string)}
                   </SelectItem>

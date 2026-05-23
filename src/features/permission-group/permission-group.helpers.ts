@@ -3,8 +3,8 @@ import type { PermissionsResponse, UpdatePermissionGroupPayload } from "./permis
 
 // Projetos derivados estendem este map adicionando entradas para seus Module.* enum values.
 const MODULE_LABELS: Record<string, string> = {
-  [Module.Management]: 'Minha Empresa',
-  [Module.Billing]: 'Mensalidade',
+  [Module.Management]: 'Minha empresa',
+  [Module.Billing]: 'Minha mensalidade',
 }
 
 export const getModuleLabel = (moduleValue: string): string =>

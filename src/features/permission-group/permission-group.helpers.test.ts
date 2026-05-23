@@ -8,12 +8,12 @@ import {
 import { MOCK_PERMISSIONS_RESPONSE } from '@/test/msw/handlers/permission-groups'
 
 describe('getModuleLabel', () => {
-  it('retorna "Minha Empresa" para módulo management', () => {
-    expect(getModuleLabel('management')).toBe('Minha Empresa')
+  it('retorna "Minha empresa" para módulo management', () => {
+    expect(getModuleLabel('management')).toBe('Minha empresa')
   })
 
-  it('retorna "Mensalidade" para módulo billing', () => {
-    expect(getModuleLabel('billing')).toBe('Mensalidade')
+  it('retorna "Minha mensalidade" para módulo billing', () => {
+    expect(getModuleLabel('billing')).toBe('Minha mensalidade')
   })
 
   it('retorna o próprio valor quando não mapeado', () => {
