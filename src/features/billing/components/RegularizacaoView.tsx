@@ -23,9 +23,6 @@ function EmployeeSuspendedView({ onLogout }: { onLogout: () => void }) {
             A conta da sua empresa está com o acesso suspenso. Entre em contato com o responsável para regularizar.
           </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Qualquer dúvida, fala com o Elias.
-        </p>
         <Button variant="ghost" size="sm" onClick={onLogout} className="gap-2 text-muted-foreground">
           <LogOut className="h-4 w-4" />
           Sair
