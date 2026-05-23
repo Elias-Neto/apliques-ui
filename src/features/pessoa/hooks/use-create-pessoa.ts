@@ -14,10 +14,10 @@ export const useCreatePessoa = () => {
         description: `${pessoa.name} foi criada com sucesso.`,
       })
     },
-    onError: () =>
+    onError: (error: any) =>
       toast({
         title: "Erro ao criar pessoa",
-        description: "Tente novamente.",
+        description: error?.response?.data?.message ?? "Tente novamente.",
         variant: "destructive",
       }),
   })
