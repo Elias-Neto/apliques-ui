@@ -11,13 +11,20 @@ import {
 import { useAdminTenants } from '../hooks/use-admin-tenants'
 import { useImpersonateTenant } from '../hooks/use-impersonate-tenant'
 import { CreateTenantModal } from '../components/CreateTenantModal'
+import { EditTenantModal } from '../components/EditTenantModal'
 import type { TypeAdminTenantRow } from '../tenants-admin.types'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR')
 }
 
-function TenantAdminRow({ tenant }: { tenant: TypeAdminTenantRow }) {
+function TenantAdminRow({
+  tenant,
+  onEdit,
+}: {
+  tenant: TypeAdminTenantRow
+  onEdit: (tenant: TypeAdminTenantRow) => void
+}) {
   const { impersonate, isPending: isImpersonating } = useImpersonateTenant()
 
   return (
@@ -47,6 +54,9 @@ function TenantAdminRow({ tenant }: { tenant: TypeAdminTenantRow }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(tenant)}>
+              Editar
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => impersonate(tenant.tenantId)}
               disabled={isImpersonating}
@@ -63,6 +73,7 @@ function TenantAdminRow({ tenant }: { tenant: TypeAdminTenantRow }) {
 export default function TenantsAdmin() {
   const { data: tenants = [], isLoading } = useAdminTenants()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingTenant, setEditingTenant] = useState<TypeAdminTenantRow | null>(null)
 
   return (
     <div className="min-h-screen bg-background">
@@ -102,7 +113,11 @@ export default function TenantsAdmin() {
                   </tr>
                 ) : (
                   tenants.map(tenant => (
-                    <TenantAdminRow key={tenant.tenantId} tenant={tenant} />
+                    <TenantAdminRow
+                      key={tenant.tenantId}
+                      tenant={tenant}
+                      onEdit={setEditingTenant}
+                    />
                   ))
                 )}
               </tbody>
@@ -114,6 +129,11 @@ export default function TenantsAdmin() {
       <CreateTenantModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+      />
+
+      <EditTenantModal
+        tenant={editingTenant}
+        onClose={() => setEditingTenant(null)}
       />
     </div>
   )

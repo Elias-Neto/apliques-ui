@@ -1,6 +1,11 @@
 import { api } from '@/services/http'
 
-import type { TypeAdminTenantRow, TypeCreateTenantPayload, TypePlanOption } from './tenants-admin.types'
+import type {
+  TypeAdminTenantRow,
+  TypeCreateTenantPayload,
+  TypeEditTenantPayload,
+  TypePlanOption,
+} from './tenants-admin.types'
 
 const listTenantsAdmin = (): Promise<TypeAdminTenantRow[]> =>
   api.get('/admin/tenants').then(r => r.data)
@@ -8,7 +13,10 @@ const listTenantsAdmin = (): Promise<TypeAdminTenantRow[]> =>
 const createTenantAdmin = (payload: TypeCreateTenantPayload): Promise<{ id: string }> =>
   api.post('/admin/tenants', payload).then(r => r.data)
 
+const editTenantAdmin = ({ tenantId, ...payload }: TypeEditTenantPayload): Promise<void> =>
+  api.patch(`/admin/tenants/${tenantId}`, payload).then(r => r.data)
+
 const listPlans = (): Promise<TypePlanOption[]> =>
   api.get('/plans').then(r => r.data)
 
-export { listTenantsAdmin, createTenantAdmin, listPlans }
+export { listTenantsAdmin, createTenantAdmin, editTenantAdmin, listPlans }

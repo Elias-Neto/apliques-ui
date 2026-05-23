@@ -25,6 +25,7 @@ enum Permission {
   ImpersonateTenant = 'platform.tenants.impersonate',
   TenantAdminList = 'platform.tenants.list',
   TenantAdminCreate = 'platform.tenants.create',
+  TenantAdminEdit = 'platform.tenants.edit',
 }
 
 export { UserRole, Module, Permission }

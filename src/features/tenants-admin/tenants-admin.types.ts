@@ -19,4 +19,10 @@ type TypeCreateTenantPayload = {
 
 type TypePlanOption = { planId: string; name: string }
 
-export type { TypeAdminTenantRow, TypeCreateTenantPayload, TypePlanOption }
+type TypeEditTenantPayload = {
+  tenantId: string
+  company: { name: string; cnpj?: string }
+  planId: string
+}
+
+export type { TypeAdminTenantRow, TypeCreateTenantPayload, TypeEditTenantPayload, TypePlanOption }
