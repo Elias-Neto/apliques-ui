@@ -1,9 +1,12 @@
+import { ClipboardList, Users, Palette, Wallet } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import { Permission } from "@/types/enums"
 
 export type NavItem = {
   label: string
   href: string
   icon: LucideIcon
+  permission: Permission
 }
 
 export type NavSection = {
@@ -11,6 +14,14 @@ export type NavSection = {
   items: NavItem[]
 }
 
-// Bootstrap base: vazio. Projetos derivados editam este arquivo após clonar.
-// Importe ícones nominalmente de lucide-react: import { Wrench } from "lucide-react"
-export const domainSections: NavSection[] = []
+export const domainSections: NavSection[] = [
+  {
+    label: 'Apliques',
+    items: [
+      { label: 'Produção',   href: '/apliques/producao',   icon: ClipboardList, permission: Permission.OrdersRead },
+      { label: 'Clientes',   href: '/apliques/clientes',   icon: Users,         permission: Permission.CustomersRead },
+      { label: 'Catálogo',   href: '/apliques/catalogo',   icon: Palette,       permission: Permission.MaterialsRead },
+      { label: 'Financeiro', href: '/apliques/financeiro', icon: Wallet,        permission: Permission.FinanceRead },
+    ],
+  },
+]

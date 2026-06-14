@@ -152,20 +152,24 @@ export function MainMenu({ className }: MainMenuProps) {
                     </MenuItem>
                   </MenuSection>
 
-                  {domainSections.map(section => (
-                    <MenuSection key={section.label} title={section.label} isCollapsed={isCollapsed}>
-                      {section.items.map(item => (
-                        <MenuItem
-                          key={item.href}
-                          href={item.href}
-                          icon={<item.icon className="h-full w-full" />}
-                          isCollapsed={isCollapsed}
-                        >
-                          {item.label}
-                        </MenuItem>
-                      ))}
-                    </MenuSection>
-                  ))}
+                  {domainSections.map(section => {
+                    const visibleItems = section.items.filter(item => permissions.includes(item.permission))
+                    if (visibleItems.length === 0) return null
+                    return (
+                      <MenuSection key={section.label} title={section.label} isCollapsed={isCollapsed}>
+                        {visibleItems.map(item => (
+                          <MenuItem
+                            key={item.href}
+                            href={item.href}
+                            icon={<item.icon className="h-full w-full" />}
+                            isCollapsed={isCollapsed}
+                          >
+                            {item.label}
+                          </MenuItem>
+                        ))}
+                      </MenuSection>
+                    )
+                  })}
 
                   <MenuSection title="Minha Conta" isCollapsed={isCollapsed}>
                     <MenuItem href="/minha-conta/meus-dados" icon={<User className="h-full w-full" />} isCollapsed={isCollapsed}>

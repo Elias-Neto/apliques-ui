@@ -10,6 +10,12 @@ import MinhaMensalidade from "@/features/billing/pages/MinhaMensalidade"
 import BillingAdmin from "@/features/billing/pages/BillingAdmin"
 import TenantsAdmin from "@/features/tenants-admin/pages/TenantsAdmin"
 import MeusDados from "@/features/account/pages/MeusDados"
+import CustomersList from "@/features/customers/pages/CustomersList"
+import CustomerDetail from "@/features/customers/pages/CustomerDetail"
+import CatalogPage from "@/features/catalog/pages/CatalogPage"
+import OrdersList from "@/features/orders/pages/OrdersList"
+import OrderDetail from "@/features/orders/pages/OrderDetail"
+import OpenBalances from "@/features/finance/pages/OpenBalances"
 import { SubscriptionBanner } from "@/features/billing/components/SubscriptionBanner"
 import { RegularizacaoView } from "@/features/billing/components/RegularizacaoView"
 import { useSubscription } from "@/features/billing/hooks/use-subscription"
@@ -46,6 +52,12 @@ export const ProtectedRoutesLayout = () => {
           <Route path="/minha-mensalidade" element={<MinhaMensalidade />} />
           <Route path="/admin/billing" element={<BillingAdmin />} />
           <Route path="/admin/tenants" element={<TenantsAdmin />} />
+          <Route path="/apliques/clientes" element={<CustomersList />} />
+          <Route path="/apliques/clientes/:id" element={<CustomerDetail />} />
+          <Route path="/apliques/catalogo" element={<CatalogPage />} />
+          <Route path="/apliques/producao" element={<OrdersList />} />
+          <Route path="/apliques/producao/:id" element={<OrderDetail />} />
+          <Route path="/apliques/financeiro" element={<OpenBalances />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

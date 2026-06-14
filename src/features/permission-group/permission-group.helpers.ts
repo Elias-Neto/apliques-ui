@@ -5,6 +5,13 @@ import type { PermissionsResponse, UpdatePermissionGroupPayload } from "./permis
 const MODULE_LABELS: Record<string, string> = {
   [Module.Management]: 'Minha empresa',
   [Module.Billing]: 'Minha mensalidade',
+  [Module.Customers]: 'Clientes',
+  [Module.Materials]: 'Catálogo — Materiais',
+  [Module.Colors]:    'Catálogo — Cores',
+  [Module.Designs]:   'Desenhos',
+  [Module.Orders]:    'Pedidos',
+  [Module.Payments]:  'Pagamentos',
+  [Module.Finance]:   'Financeiro',
 }
 
 export const getModuleLabel = (moduleValue: string): string =>
