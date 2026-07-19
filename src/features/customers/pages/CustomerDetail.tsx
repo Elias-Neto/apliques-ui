@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Edit2, Plus, Trash2, Pencil } from "lucide-react"
+import { ArrowLeft, Edit2, Plus, Trash2, Pencil, FileText } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,9 +15,11 @@ import { useDeletePayment } from "../hooks/use-delete-payment"
 import { CustomerForm } from "../components/CustomerForm"
 import { DesignsSection } from "../components/DesignsSection"
 import { PaymentModal } from "../components/PaymentModal"
+import { ExtratoClienteDialog } from "../components/ExtratoClienteDialog"
 import { TypeCustomerUpdateForm } from "../customer.schema"
 import { Payment } from "../payment.types"
 import { Order } from "../customer.types"
+import { PRODUCTION_STATUS_LABEL } from "@/features/orders/order.constants"
 
 const formatCurrency = (centavos: number) =>
   (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -36,6 +38,7 @@ export default function CustomerDetail() {
   const [showEdit, setShowEdit] = useState(false)
   const [showAddPayment, setShowAddPayment] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
+  const [showExtrato, setShowExtrato] = useState(false)
 
   const handleUpdate = (data: TypeCustomerUpdateForm) => {
     if (!id) return
@@ -74,12 +77,6 @@ export default function CustomerDetail() {
   const payments = (customer as any).payments ?? []
   const orders: Order[] = (customer as any).orders ?? []
   const balance = Math.max(0, (customer as any).balance ?? 0)
-
-  const PRODUCTION_STATUS_LABEL: Record<Order['productionStatus'], string> = {
-    'em-producao': 'Em produção',
-    'pronto': 'Pronto',
-    'entregue': 'Entregue',
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,6 +127,15 @@ export default function CustomerDetail() {
             </p>
           )}
         </div>
+
+        {/* Gerar extrato (PRD-02) — desabilitado sem nenhum pedido histórico */}
+        <Button
+          className="w-full bg-slate-800 hover:bg-slate-700"
+          disabled={orders.length === 0}
+          onClick={() => setShowExtrato(true)}
+        >
+          <FileText className="h-4 w-4 mr-2" /> Gerar extrato
+        </Button>
 
         {/* Pagamentos (ledger do cliente) */}
         <div className="space-y-3">
@@ -243,6 +249,8 @@ export default function CustomerDetail() {
         initial={editingPayment ?? undefined}
         balance={balance}
       />
+
+      <ExtratoClienteDialog customer={customer} open={showExtrato} onOpenChange={setShowExtrato} />
     </div>
   )
 }

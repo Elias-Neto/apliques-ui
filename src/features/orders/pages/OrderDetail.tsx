@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Edit2 } from "lucide-react"
+import { ArrowLeft, Edit2, Receipt } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,14 +14,10 @@ import { useUpdateOrder } from "../hooks/use-update-order"
 import { useUpdateProductionStatus } from "../hooks/use-update-production-status"
 import { useDeleteOrder } from "../hooks/use-delete-order"
 import { OrderForm } from "../components/OrderForm"
+import { NotinhaPedidoDialog } from "../components/NotinhaPedidoDialog"
 import { ProductionStatus } from "../order.types"
+import { PRODUCTION_STATUS_LABEL } from "../order.constants"
 import { TypeOrderCreateForm } from "../order.schema"
-
-const STATUS_LABELS: Record<ProductionStatus, string> = {
-  'em-producao': 'Em produção',
-  'pronto': 'Pronto',
-  'entregue': 'Entregue',
-}
 
 const STATUS_VARIANTS: Record<ProductionStatus, 'default' | 'secondary' | 'outline'> = {
   'em-producao': 'default',
@@ -40,6 +36,7 @@ export default function OrderDetail() {
   const { mutate: updateStatus } = useUpdateProductionStatus()
   const { mutate: deleteOrder } = useDeleteOrder()
   const [showEdit, setShowEdit] = useState(false)
+  const [showNotinha, setShowNotinha] = useState(false)
 
   const handleUpdate = (data: TypeOrderCreateForm) => {
     if (!id) return
@@ -86,7 +83,7 @@ export default function OrderDetail() {
             <p className="text-sm text-muted-foreground">{formatDate(order.orderDate)}</p>
           </div>
           <Badge variant={STATUS_VARIANTS[order.productionStatus]}>
-            {STATUS_LABELS[order.productionStatus]}
+            {PRODUCTION_STATUS_LABEL[order.productionStatus]}
           </Badge>
         </div>
 
@@ -137,8 +134,8 @@ export default function OrderDetail() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(Object.keys(STATUS_LABELS) as ProductionStatus[]).map(s => (
-                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+              {(Object.keys(PRODUCTION_STATUS_LABEL) as ProductionStatus[]).map(s => (
+                <SelectItem key={s} value={s}>{PRODUCTION_STATUS_LABEL[s]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -176,6 +173,14 @@ export default function OrderDetail() {
           </AlertDialog>
         </div>
 
+        {/* Gerar notinha (PRD-02) */}
+        <Button
+          className="w-full bg-slate-800 hover:bg-slate-700"
+          onClick={() => setShowNotinha(true)}
+        >
+          <Receipt className="h-4 w-4 mr-2" /> Gerar notinha
+        </Button>
+
         {/* Link pro cliente */}
         <div>
           <Button
@@ -202,6 +207,8 @@ export default function OrderDetail() {
           />
         </DialogContent>
       </Dialog>
+
+      <NotinhaPedidoDialog order={order} open={showNotinha} onOpenChange={setShowNotinha} />
     </div>
   )
 }
