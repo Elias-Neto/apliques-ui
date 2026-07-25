@@ -16,14 +16,8 @@ import { useDeleteOrder } from "../hooks/use-delete-order"
 import { OrderForm } from "../components/OrderForm"
 import { NotinhaPedidoDialog } from "../components/NotinhaPedidoDialog"
 import { ProductionStatus } from "../order.types"
-import { PRODUCTION_STATUS_LABEL } from "../order.constants"
+import { PRODUCTION_STATUS_BADGE_CLASSES, PRODUCTION_STATUS_LABEL } from "../order.constants"
 import { TypeOrderCreateForm } from "../order.schema"
-
-const STATUS_VARIANTS: Record<ProductionStatus, 'default' | 'secondary' | 'outline'> = {
-  'em-producao': 'default',
-  'pronto': 'secondary',
-  'entregue': 'outline',
-}
 
 const formatCurrency = (c: number) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const formatDate = (d: string) => new Date(d).toLocaleDateString('pt-BR')
@@ -82,7 +76,7 @@ export default function OrderDetail() {
             </h1>
             <p className="text-sm text-muted-foreground">{formatDate(order.orderDate)}</p>
           </div>
-          <Badge variant={STATUS_VARIANTS[order.productionStatus]}>
+          <Badge variant="outline" className={PRODUCTION_STATUS_BADGE_CLASSES[order.productionStatus]}>
             {PRODUCTION_STATUS_LABEL[order.productionStatus]}
           </Badge>
         </div>

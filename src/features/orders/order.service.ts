@@ -1,14 +1,17 @@
 import { api } from "@/services/http"
-import { Order, OrdersListResponse, ProductionStatus } from "./order.types"
+import { Order, OrdersListResponse, OrderSortDir, OrderSortField, ProductionStatus } from "./order.types"
 import { TypeOrderCreateForm, TypeOrderUpdateForm } from "./order.schema"
 
-interface OrderFilters {
+export interface OrderFilters {
   productionStatus?: ProductionStatus
   customerID?: string
+  materialID?: string
   dateFrom?: string
   dateTo?: string
   limit?: number
   offset?: number
+  sortBy?: OrderSortField
+  sortDir?: OrderSortDir
 }
 
 export const fetchOrders = (filters?: OrderFilters): Promise<OrdersListResponse> =>

@@ -1,4 +1,4 @@
-type ProductionStatus = 'em-producao' | 'pronto' | 'entregue'
+type ProductionStatus = 'a-fazer' | 'em-producao' | 'pronto' | 'entregue'
 
 interface OrderItem {
   materialID: string
@@ -28,4 +28,7 @@ interface OrdersListResponse {
   total: number
 }
 
-export type { Order, OrderItem, OrdersListResponse, ProductionStatus }
+type OrderSortField = 'orderDate' | 'totalPrice' | 'quantity'
+type OrderSortDir = 'asc' | 'desc'
+
+export type { Order, OrderItem, OrdersListResponse, ProductionStatus, OrderSortField, OrderSortDir }

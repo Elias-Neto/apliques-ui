@@ -1,3 +1,5 @@
+import { ProductionStatus } from "../orders/order.types"
+
 interface Customer {
   id: string
   name: string
@@ -48,7 +50,7 @@ interface Order {
   orderDate: string
   items: OrderItem[]
   totalPrice: number
-  productionStatus: 'em-producao' | 'pronto' | 'entregue'
+  productionStatus: ProductionStatus
   observation?: string | null
 }
 
