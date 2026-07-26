@@ -1,10 +1,9 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Edit2, Receipt } from "lucide-react"
+import { ArrowLeft, Check, Edit2, Receipt, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -16,8 +15,9 @@ import { useDeleteOrder } from "../hooks/use-delete-order"
 import { OrderForm } from "../components/OrderForm"
 import { NotinhaPedidoDialog } from "../components/NotinhaPedidoDialog"
 import { ProductionStatus } from "../order.types"
-import { PRODUCTION_STATUS_BADGE_CLASSES, PRODUCTION_STATUS_LABEL } from "../order.constants"
+import { PRODUCTION_STATUS_ACTIVE_CLASSES, PRODUCTION_STATUS_BADGE_CLASSES, PRODUCTION_STATUS_LABEL } from "../order.constants"
 import { TypeOrderCreateForm } from "../order.schema"
+import { cn } from "@/lib/utils"
 
 const formatCurrency = (c: number) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const formatDate = (d: string) => new Date(d).toLocaleDateString('pt-BR')
@@ -76,9 +76,36 @@ export default function OrderDetail() {
             </h1>
             <p className="text-sm text-muted-foreground">{formatDate(order.orderDate)}</p>
           </div>
-          <Badge variant="outline" className={PRODUCTION_STATUS_BADGE_CLASSES[order.productionStatus]}>
-            {PRODUCTION_STATUS_LABEL[order.productionStatus]}
-          </Badge>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-12 w-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                title="Excluir pedido"
+              >
+                <Trash2 className="h-5 w-5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir pedido?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Os pagamentos do cliente não serão afetados. O saldo devedor será recalculado automaticamente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive hover:bg-destructive/90"
+                  onClick={handleDelete}
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         {/* Itens */}
@@ -120,19 +147,30 @@ export default function OrderDetail() {
         {/* Etapa de produção */}
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Etapa de produção</p>
-          <Select
+          <ToggleGroup
+            type="single"
             value={order.productionStatus}
-            onValueChange={v => updateStatus({ id: order.id, status: v as ProductionStatus })}
+            onValueChange={v => {
+              if (!v) return // Radix desmarca ao clicar no item já ativo — etapa nunca é opcional
+              updateStatus({ id: order.id, status: v as ProductionStatus })
+            }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full"
           >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(PRODUCTION_STATUS_LABEL) as ProductionStatus[]).map(s => (
-                <SelectItem key={s} value={s}>{PRODUCTION_STATUS_LABEL[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {(Object.keys(PRODUCTION_STATUS_LABEL) as ProductionStatus[]).map(s => (
+              <ToggleGroupItem
+                key={s}
+                value={s}
+                className={cn(
+                  PRODUCTION_STATUS_BADGE_CLASSES[s],
+                  "h-12 flex-1 rounded-full border-2 border-transparent font-medium data-[state=on]:font-semibold",
+                  PRODUCTION_STATUS_ACTIVE_CLASSES[s]
+                )}
+              >
+                {order.productionStatus === s && <Check className="h-4 w-4" />}
+                {PRODUCTION_STATUS_LABEL[s]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
 
         {/* Ações */}
@@ -141,48 +179,12 @@ export default function OrderDetail() {
             <Edit2 className="h-4 w-4 mr-2" /> Editar pedido
           </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-destructive hover:text-destructive">
-                Excluir
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Excluir pedido?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Os pagamentos do cliente não serão afetados. O saldo devedor será recalculado automaticamente.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive hover:bg-destructive/90"
-                  onClick={handleDelete}
-                >
-                  Excluir
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        {/* Gerar notinha (PRD-02) */}
-        <Button
-          className="w-full bg-slate-800 hover:bg-slate-700"
-          onClick={() => setShowNotinha(true)}
-        >
-          <Receipt className="h-4 w-4 mr-2" /> Gerar notinha
-        </Button>
-
-        {/* Link pro cliente */}
-        <div>
+          {/* Gerar notinha (PRD-02) */}
           <Button
-            variant="link"
-            className="px-0 text-muted-foreground"
-            onClick={() => navigate(`/apliques/clientes/${order.customerID}`)}
+            className="flex-1 bg-slate-800 hover:bg-slate-700"
+            onClick={() => setShowNotinha(true)}
           >
-            Ver ficha de {order.customer?.name ?? 'cliente'} →
+            <Receipt className="h-4 w-4 mr-2" /> Gerar notinha
           </Button>
         </div>
 
