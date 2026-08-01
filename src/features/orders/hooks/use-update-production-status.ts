@@ -10,8 +10,9 @@ export const useUpdateProductionStatus = () => {
   const { toast } = useToast()
   return useMutation({
     mutationFn: ({ id, status }: Vars) => updateProductionStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["orders"] })
+      qc.invalidateQueries({ queryKey: ["order", variables.id] })
       toast({ title: "Etapa atualizada" })
     },
     onError: () => toast({ title: "Erro ao atualizar etapa", variant: "destructive" }),

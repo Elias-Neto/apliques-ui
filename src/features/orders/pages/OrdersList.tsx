@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardList, Plus } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardList, Trash2 } from "lucide-react"
 import { Heading } from "@/components/ui/heading"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Badge } from "@/components/ui/badge"
@@ -22,12 +21,9 @@ import {
   Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useFetchOrders } from "../hooks/use-fetch-orders"
-import { useCreateOrder } from "../hooks/use-create-order"
 import { useUpdateProductionStatus } from "../hooks/use-update-production-status"
 import { useDeleteOrder } from "../hooks/use-delete-order"
 import { OrderFilters as OrderFiltersForm } from "../components/OrderFilters"
-import { OrderForm } from "../components/OrderForm"
-import { TypeOrderCreateForm } from "../order.schema"
 import { Order, OrderSortDir, OrderSortField, ProductionStatus } from "../order.types"
 import { OrderFilters } from "../order.service"
 import { PRODUCTION_STATUS_BADGE_CLASSES, PRODUCTION_STATUS_LABEL } from "../order.constants"
@@ -97,12 +93,13 @@ const DeleteOrderButton = ({ onConfirm }: DeleteOrderButtonProps) => (
   <AlertDialog>
     <AlertDialogTrigger asChild>
       <Button
-        size="sm"
+        size="icon"
         variant="ghost"
-        className="text-destructive hover:text-destructive text-xs"
+        title="Excluir pedido"
+        className="text-destructive hover:text-destructive hover:bg-destructive/10"
         onClick={e => e.stopPropagation()}
       >
-        Excluir
+        <Trash2 className="h-4 w-4" />
       </Button>
     </AlertDialogTrigger>
     <AlertDialogContent onClick={e => e.stopPropagation()}>
@@ -136,14 +133,8 @@ export default function OrdersList() {
     sortBy: sort?.field,
     sortDir: sort?.dir,
   })
-  const { mutate: createMutate, isPending: isCreating } = useCreateOrder()
   const { mutate: updateStatus } = useUpdateProductionStatus()
   const { mutate: deleteMutate } = useDeleteOrder()
-  const [showCreate, setShowCreate] = useState(false)
-
-  const handleCreate = (formData: TypeOrderCreateForm) => {
-    createMutate(formData, { onSuccess: () => setShowCreate(false) })
-  }
 
   const handleFilter = (f: BaseFilters) => {
     setFilters(f)
@@ -181,7 +172,7 @@ export default function OrdersList() {
         description="Acompanhe os pedidos em produção"
         showButton
         buttonText="Novo Pedido"
-        onButtonClick={() => setShowCreate(true)}
+        onButtonClick={() => navigate('/apliques/producao/novo')}
       >
         Produção
       </Heading>
@@ -195,7 +186,7 @@ export default function OrdersList() {
             title="Nenhum pedido encontrado"
             description="Cadastre o primeiro pedido para começar."
             buttonText="Novo Pedido"
-            onButtonClick={() => setShowCreate(true)}
+            onButtonClick={() => navigate('/apliques/producao/novo')}
           />
         ) : (
           <>
@@ -306,13 +297,6 @@ export default function OrdersList() {
           </>
         )}
       </div>
-
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Novo Pedido</DialogTitle></DialogHeader>
-          <OrderForm onSubmit={handleCreate} submitLabel="Criar Pedido" isLoading={isCreating} />
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

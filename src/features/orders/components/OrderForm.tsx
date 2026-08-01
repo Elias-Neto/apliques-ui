@@ -5,43 +5,27 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { X, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useFetchCustomers } from "@/features/customers/hooks/use-fetch-customers"
 import { useCustomerDesigns } from "@/features/customers/hooks/use-customer-designs"
 import { useFetchMaterials } from "@/features/catalog/hooks/use-materials"
 import { useFetchColors } from "@/features/catalog/hooks/use-colors"
 import { orderCreateSchema, TypeOrderCreateForm } from "../order.schema"
 import { Order } from "../order.types"
+import { OrderItemRow } from "./OrderItemRow"
+import { FormItem, subtotal, formatCurrency, toReais, toCents, newEmptyItem } from "./order-item.utils"
 
 interface OrderFormProps {
   initialData?: Partial<Order>
   onSubmit: (data: TypeOrderCreateForm) => void
+  onCancel?: () => void
   submitLabel: string
   isLoading?: boolean
 }
 
-type FormItem = {
-  id: string
-  materialID: string
-  colorID: string
-  designID: string
-  unitPrice: string
-  quantity: string
-}
-
-const toReais = (cents: number) => (cents / 100).toFixed(2)
-const toCents = (value: string) => Math.round(parseFloat(value.replace(',', '.')) * 100) || 0
-const subtotal = (item: FormItem) => toCents(item.unitPrice) * (parseInt(item.quantity) || 0)
-const formatCurrency = (cents: number) =>
-  (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
-const newEmptyItem = (): FormItem => ({
-  id: Math.random().toString(36).slice(2),
-  materialID: '', colorID: '', designID: '', unitPrice: '', quantity: '',
-})
-
-export function OrderForm({ initialData, onSubmit, submitLabel, isLoading }: OrderFormProps) {
+export function OrderForm({ initialData, onSubmit, onCancel, submitLabel, isLoading }: OrderFormProps) {
   const { data: customersData } = useFetchCustomers()
   const { data: materials = [] } = useFetchMaterials()
   const { data: colors = [] }    = useFetchColors()
@@ -73,6 +57,12 @@ export function OrderForm({ initialData, onSubmit, submitLabel, isLoading }: Ord
     return [newEmptyItem()]
   })
 
+  // L-05 (test plan rev. 11): item carregado de um pedido já existente (edição) nasce
+  // colapsado — só um item recém-adicionado nesta sessão (addItem) nasce expandido.
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(() =>
+    initialData?.items?.length ? null : (items[0]?.id ?? null)
+  )
+
   useEffect(() => {
     // ao trocar de cliente, reseta o designID de todos os itens
     setItems(prev => prev.map(i => ({ ...i, designID: '' })))
@@ -92,8 +82,22 @@ export function OrderForm({ initialData, onSubmit, submitLabel, isLoading }: Ord
     })
   }, [materials, updateItem])
 
-  const addItem = () => setItems(prev => [...prev, newEmptyItem()])
-  const removeItem = (id: string) => { if (items.length > 1) setItems(prev => prev.filter(i => i.id !== id)) }
+  const toggleExpand = (id: string) => {
+    setExpandedItemId(prev => (prev === id ? null : id))
+  }
+
+  const addItem = () => {
+    const item = newEmptyItem()
+    setItems(prev => [...prev, item])
+    // L-06 (test plan rev. 11): item novo nasce expandido, colapsando qualquer outro aberto
+    setExpandedItemId(item.id)
+  }
+
+  const removeItem = (id: string) => {
+    if (items.length <= 1) return
+    setItems(prev => prev.filter(i => i.id !== id))
+    setExpandedItemId(prev => (prev === id ? null : prev))
+  }
 
   const total = items.reduce((sum, item) => sum + subtotal(item), 0)
 
@@ -136,92 +140,31 @@ export function OrderForm({ initialData, onSubmit, submitLabel, isLoading }: Ord
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label>Itens *</Label>
-          <Button type="button" size="sm" variant="outline" onClick={addItem}>
-            <Plus className="h-3 w-3 mr-1" /> Adicionar item
-          </Button>
-        </div>
+        <Label>Itens *</Label>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {items.map((item, idx) => (
-            <div key={item.id} className="rounded-md border p-3 space-y-2 bg-muted/20">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-muted-foreground font-medium">Item {idx + 1}</span>
-                <Button
-                  type="button" size="icon" variant="ghost"
-                  className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                  onClick={() => removeItem(item.id)}
-                  disabled={items.length <= 1}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs">Material *</Label>
-                <Select value={item.materialID} onValueChange={v => handleMaterialChange(item.id, v)}>
-                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Material" /></SelectTrigger>
-                  <SelectContent>
-                    {materials.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs">Cor *</Label>
-                <Select value={item.colorID} onValueChange={v => updateItem(item.id, { colorID: v })}>
-                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Cor" /></SelectTrigger>
-                  <SelectContent>
-                    {colors.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs">Desenho *</Label>
-                <Select
-                  value={item.designID}
-                  onValueChange={v => updateItem(item.id, { designID: v })}
-                  disabled={!selectedCustomerID}
-                >
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder={!selectedCustomerID ? "Selecione o cliente primeiro" : "Desenho"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {designs.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 items-end">
-                <div className="space-y-1">
-                  <Label className="text-xs">Preço un. (R$) *</Label>
-                  <Input
-                    className="h-8 text-sm" type="number" min={0.01} step={0.01} placeholder="0.35"
-                    value={item.unitPrice}
-                    onChange={e => updateItem(item.id, { unitPrice: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Quantidade *</Label>
-                  <Input
-                    className="h-8 text-sm" type="number" min={1} placeholder="100"
-                    value={item.quantity}
-                    onChange={e => updateItem(item.id, { quantity: e.target.value })}
-                  />
-                </div>
-                <div className="text-right text-sm font-medium text-muted-foreground pt-5">
-                  = {formatCurrency(subtotal(item))}
-                </div>
-              </div>
-            </div>
+            <OrderItemRow
+              key={item.id}
+              item={item}
+              index={idx}
+              materials={materials}
+              colors={colors}
+              designs={designs}
+              selectedCustomerID={selectedCustomerID}
+              isExpanded={expandedItemId === item.id}
+              onToggleExpand={toggleExpand}
+              onUpdate={updateItem}
+              onMaterialChange={handleMaterialChange}
+              onRemove={removeItem}
+              canRemove={items.length > 1}
+            />
           ))}
         </div>
 
-        <div className="flex justify-end pt-1 border-t">
-          <span className="text-sm font-semibold">TOTAL: {formatCurrency(total)}</span>
-        </div>
+        <Button type="button" variant="outline" className="w-full border-dashed" onClick={addItem}>
+          <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar item
+        </Button>
       </div>
 
       <div className="space-y-2">
@@ -229,9 +172,22 @@ export function OrderForm({ initialData, onSubmit, submitLabel, isLoading }: Ord
         <Textarea rows={2} placeholder="Observações sobre o pedido" {...register('observation')} />
       </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Salvando..." : submitLabel}
-      </Button>
+      <div className="sticky bottom-0 bg-background pt-2 border-t space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Total</span>
+          <span className="text-lg font-bold">{formatCurrency(total)}</span>
+        </div>
+        <div className="flex gap-2">
+          {onCancel && (
+            <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+              Cancelar
+            </Button>
+          )}
+          <Button type="submit" className="flex-1" disabled={isLoading}>
+            {isLoading ? "Salvando..." : submitLabel}
+          </Button>
+        </div>
+      </div>
     </form>
   )
 }

@@ -14,6 +14,7 @@ import CustomersList from "@/features/customers/pages/CustomersList"
 import CustomerDetail from "@/features/customers/pages/CustomerDetail"
 import CatalogPage from "@/features/catalog/pages/CatalogPage"
 import OrdersList from "@/features/orders/pages/OrdersList"
+import OrderNew from "@/features/orders/pages/OrderNew"
 import OrderDetail from "@/features/orders/pages/OrderDetail"
 import OpenBalances from "@/features/finance/pages/OpenBalances"
 import { SubscriptionBanner } from "@/features/billing/components/SubscriptionBanner"
@@ -56,6 +57,7 @@ export const ProtectedRoutesLayout = () => {
           <Route path="/apliques/clientes/:id" element={<CustomerDetail />} />
           <Route path="/apliques/catalogo" element={<CatalogPage />} />
           <Route path="/apliques/producao" element={<OrdersList />} />
+          <Route path="/apliques/producao/novo" element={<OrderNew />} />
           <Route path="/apliques/producao/:id" element={<OrderDetail />} />
           <Route path="/apliques/financeiro" element={<OpenBalances />} />
           <Route path="*" element={<NotFound />} />
