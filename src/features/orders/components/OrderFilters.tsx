@@ -125,17 +125,19 @@ export function OrderFilters({ onFilter }: OrderFiltersProps) {
         </Select>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1 w-full md:w-auto">
         <Label className="text-xs">Data de</Label>
-        <Input type="date" value={from} onChange={e => handleFrom(e.target.value)} className="w-36" />
+        <Input type="date" value={from} onChange={e => handleFrom(e.target.value)} className="w-full md:w-36" />
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1 w-full md:w-auto">
         <Label className="text-xs">até</Label>
-        <Input type="date" value={to} onChange={e => handleTo(e.target.value)} className="w-36" />
+        <Input type="date" value={to} onChange={e => handleTo(e.target.value)} className="w-full md:w-36" />
       </div>
 
-      <Button size="sm" variant="ghost" onClick={clear}>Limpar</Button>
+      <div className="w-full md:w-auto">
+        <Button size="sm" variant="ghost" onClick={clear} className="w-full md:w-auto">Limpar</Button>
+      </div>
     </div>
   )
 }

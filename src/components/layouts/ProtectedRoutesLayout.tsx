@@ -16,6 +16,7 @@ import CatalogPage from "@/features/catalog/pages/CatalogPage"
 import OrdersList from "@/features/orders/pages/OrdersList"
 import OrderNew from "@/features/orders/pages/OrderNew"
 import OrderDetail from "@/features/orders/pages/OrderDetail"
+import OrderEdit from "@/features/orders/pages/OrderEdit"
 import OpenBalances from "@/features/finance/pages/OpenBalances"
 import { SubscriptionBanner } from "@/features/billing/components/SubscriptionBanner"
 import { RegularizacaoView } from "@/features/billing/components/RegularizacaoView"
@@ -59,6 +60,7 @@ export const ProtectedRoutesLayout = () => {
           <Route path="/apliques/producao" element={<OrdersList />} />
           <Route path="/apliques/producao/novo" element={<OrderNew />} />
           <Route path="/apliques/producao/:id" element={<OrderDetail />} />
+          <Route path="/apliques/producao/:id/editar" element={<OrderEdit />} />
           <Route path="/apliques/financeiro" element={<OpenBalances />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

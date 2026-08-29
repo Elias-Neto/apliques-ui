@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,9 +63,14 @@ export function OrderForm({ initialData, onSubmit, onCancel, submitLabel, isLoad
     initialData?.items?.length ? null : (items[0]?.id ?? null)
   )
 
+  // DEF-002: reseta designID só quando o cliente muda de fato depois do mount —
+  // não na primeira renderização (onde selectedCustomerID já nasce preenchido na edição).
+  const prevCustomerIDRef = useRef(selectedCustomerID)
   useEffect(() => {
-    // ao trocar de cliente, reseta o designID de todos os itens
-    setItems(prev => prev.map(i => ({ ...i, designID: '' })))
+    if (selectedCustomerID !== prevCustomerIDRef.current) {
+      setItems(prev => prev.map(i => ({ ...i, designID: '' })))
+    }
+    prevCustomerIDRef.current = selectedCustomerID
   }, [selectedCustomerID])
 
   const customers = customersData?.items ?? []

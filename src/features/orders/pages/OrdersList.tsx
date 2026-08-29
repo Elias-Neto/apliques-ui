@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardList, Trash2 } from "lucide-react"
 import { Heading } from "@/components/ui/heading"
 import { EmptyState } from "@/components/ui/empty-state"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -246,28 +245,29 @@ export default function OrdersList() {
                       className="flex-1 cursor-pointer"
                       onClick={() => navigate(`/apliques/producao/${order.id}`)}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold">{order.customer?.name ?? 'Cliente'}</span>
-                        <Badge variant="outline" className={PRODUCTION_STATUS_BADGE_CLASSES[order.productionStatus]}>
-                          {PRODUCTION_STATUS_LABEL[order.productionStatus]}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {orderQuantity(order)} un · {formatCurrency(order.totalPrice)}
-                        {order.orderDate && ` · ${formatDate(order.orderDate)}`}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {materialsSummary(order)}
-                      </p>
+                      <span className="font-semibold">{order.customer?.name ?? 'Cliente'}</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <StatusSelect
                         order={order}
                         onChange={status => updateStatus({ id: order.id, status })}
                       />
                       <DeleteOrderButton onConfirm={() => deleteMutate(order.id)} />
                     </div>
+                  </div>
+
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/apliques/producao/${order.id}`)}
+                  >
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {orderQuantity(order)} un · {formatCurrency(order.totalPrice)}
+                      {order.orderDate && ` · ${formatDate(order.orderDate)}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {materialsSummary(order)}
+                    </p>
                   </div>
                 </Card>
               ))}

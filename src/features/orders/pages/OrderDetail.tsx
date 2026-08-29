@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Check, Edit2, Receipt, Trash2 } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
@@ -9,14 +8,11 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useFetchOrder } from "../hooks/use-fetch-order"
-import { useUpdateOrder } from "../hooks/use-update-order"
 import { useUpdateProductionStatus } from "../hooks/use-update-production-status"
 import { useDeleteOrder } from "../hooks/use-delete-order"
-import { OrderForm } from "../components/OrderForm"
 import { NotinhaPedidoDialog } from "../components/NotinhaPedidoDialog"
 import { ProductionStatus } from "../order.types"
 import { PRODUCTION_STATUS_ACTIVE_CLASSES, PRODUCTION_STATUS_BADGE_CLASSES, PRODUCTION_STATUS_LABEL } from "../order.constants"
-import { TypeOrderCreateForm } from "../order.schema"
 import { cn } from "@/lib/utils"
 
 const formatCurrency = (c: number) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -26,16 +22,9 @@ export default function OrderDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: order, isLoading } = useFetchOrder(id ?? null)
-  const { mutate: updateOrder, isPending: isUpdating } = useUpdateOrder()
   const { mutate: updateStatus } = useUpdateProductionStatus()
   const { mutate: deleteOrder } = useDeleteOrder()
-  const [showEdit, setShowEdit] = useState(false)
   const [showNotinha, setShowNotinha] = useState(false)
-
-  const handleUpdate = (data: TypeOrderCreateForm) => {
-    if (!id) return
-    updateOrder({ id, data }, { onSuccess: () => setShowEdit(false) })
-  }
 
   const handleDelete = () => {
     if (!id) return
@@ -175,7 +164,7 @@ export default function OrderDetail() {
 
         {/* Ações */}
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowEdit(true)}>
+          <Button variant="outline" onClick={() => navigate(`/apliques/producao/${id}/editar`)}>
             <Edit2 className="h-4 w-4 mr-2" /> Editar pedido
           </Button>
 
@@ -189,20 +178,6 @@ export default function OrderDetail() {
         </div>
 
       </div>
-
-      <Dialog open={showEdit} onOpenChange={setShowEdit}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Editar Pedido</DialogTitle>
-          </DialogHeader>
-          <OrderForm
-            initialData={order}
-            onSubmit={handleUpdate}
-            submitLabel="Salvar"
-            isLoading={isUpdating}
-          />
-        </DialogContent>
-      </Dialog>
 
       <NotinhaPedidoDialog order={order} open={showNotinha} onOpenChange={setShowNotinha} />
     </div>
