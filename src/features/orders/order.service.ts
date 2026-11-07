@@ -6,6 +6,12 @@ export interface OrderFilters {
   productionStatus?: ProductionStatus
   customerID?: string
   materialID?: string
+  colorID?: string
+  search?: string
+  quantityMin?: number
+  quantityMax?: number
+  totalPriceMin?: number
+  totalPriceMax?: number
   dateFrom?: string
   dateTo?: string
   limit?: number

@@ -12,25 +12,17 @@ interface NotinhaPedidoCardProps {
 // não classes Tailwind — mesmo padrão do sonar-ui, evita depender de
 // extração de stylesheet que o html-to-image não garante 1:1.
 export const NotinhaPedidoCard = forwardRef<HTMLDivElement, NotinhaPedidoCardProps>(
-  ({ order, tenantName }, ref) => (
+  ({ order, tenantName: _tenantName }, ref) => (
     <div
       ref={ref}
       style={{
         width: 300,
         backgroundColor: '#ffffff',
-        borderRadius: 16,
         overflow: 'hidden',
         fontFamily: 'system-ui, -apple-system, sans-serif',
       }}
     >
-      <div style={{ backgroundColor: '#1e293b', padding: '16px 20px' }}>
-        <p style={{ color: '#ffffff', fontWeight: 700, fontSize: 16, textTransform: 'uppercase', letterSpacing: 0.5, margin: 0 }}>
-          {tenantName}
-        </p>
-        <p style={{ color: '#94a3b8', fontSize: 12, margin: '2px 0 0 0' }}>Apliques em emborrachado</p>
-      </div>
-
-      <div style={{ height: 6, background: 'linear-gradient(to right, #3b82f6, #6366f1, #a855f7)' }} />
+      <div style={{ height: 6, backgroundColor: '#16a34a' }} />
 
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
@@ -51,10 +43,12 @@ export const NotinhaPedidoCard = forwardRef<HTMLDivElement, NotinhaPedidoCardPro
               <tr key={i}>
                 <td style={{ border: '1px solid #e2e8f0', padding: 8, verticalAlign: 'top', color: '#334155' }}>
                   <p style={{ fontWeight: 600, margin: 0 }}>
-                    {item.material?.name ?? '—'} · {item.color?.name ?? '—'}
+                    {item.design?.name ?? `${item.material?.name ?? '—'} · ${item.color?.name ?? '—'}`}
                   </p>
                   {item.design?.name && (
-                    <p style={{ fontSize: 12, color: '#94a3b8', margin: '2px 0 0 0' }}>{item.design.name}</p>
+                    <p style={{ fontSize: 12, color: '#94a3b8', margin: '2px 0 0 0' }}>
+                      {item.material?.name ?? '—'} · {item.color?.name ?? '—'}
+                    </p>
                   )}
                   <p style={{ fontSize: 12, color: '#94a3b8', margin: '2px 0 0 0' }}>
                     {item.quantity} un × {formatCurrency(item.unitPrice)}

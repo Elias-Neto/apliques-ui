@@ -1,9 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/toast/use-toast"
-import { fetchMaterials, createMaterial, updateMaterial, deleteMaterial } from "../material.service"
+import { fetchMaterials, createMaterial, updateMaterial, deleteMaterial, MaterialFilters } from "../material.service"
 
-export const useFetchMaterials = () =>
-  useQuery({ queryKey: ["materials"], queryFn: fetchMaterials })
+export const useFetchMaterials = (filters?: MaterialFilters) =>
+  useQuery({
+    queryKey: ["materials", filters],
+    queryFn: () => fetchMaterials(filters),
+    placeholderData: keepPreviousData,
+  })
 
 export const useCreateMaterial = () => {
   const qc = useQueryClient()

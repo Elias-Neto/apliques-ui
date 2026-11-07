@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react"
 import { Share2, Download } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -44,7 +45,7 @@ export function ExtratoClienteDialog({ customer, open, onOpenChange }: ExtratoCl
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className={cn("max-w-sm", step === 'preview' && "max-h-[85vh] overflow-hidden grid-rows-[auto_1fr_auto]")}>
         {step === 'period' ? (
           <>
             <DialogHeader>
@@ -94,10 +95,10 @@ export function ExtratoClienteDialog({ customer, open, onOpenChange }: ExtratoCl
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Extrato de cobrança</DialogTitle>
+              <DialogTitle>Extrato do cliente</DialogTitle>
             </DialogHeader>
 
-            <div className="flex justify-center bg-slate-50 rounded-2xl p-3">
+            <div className="flex justify-center items-start bg-slate-50 rounded-2xl p-3 overflow-y-auto min-h-0">
               <ExtratoClienteCard
                 ref={cardRef}
                 customer={customer}

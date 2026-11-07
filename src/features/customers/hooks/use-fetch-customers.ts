@@ -1,5 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
-import { fetchCustomers } from "../customer.service"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import { fetchCustomers, CustomerFilters } from "../customer.service"
 
-export const useFetchCustomers = (params?: { search?: string }) =>
-  useQuery({ queryKey: ["customers", params], queryFn: () => fetchCustomers(params) })
+export const useFetchCustomers = (params?: CustomerFilters) =>
+  useQuery({
+    queryKey: ["customers", params],
+    queryFn: () => fetchCustomers(params),
+    placeholderData: keepPreviousData,
+  })

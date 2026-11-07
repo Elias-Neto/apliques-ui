@@ -2,7 +2,18 @@ import { api } from "@/services/http"
 import { Customer, CustomersListResponse } from "./customer.types"
 import { TypeCustomerCreateForm, TypeCustomerUpdateForm } from "./customer.schema"
 
-export const fetchCustomers = (params?: { search?: string; limit?: number; offset?: number }): Promise<CustomersListResponse> =>
+export type CustomerSortField = 'name' | 'ordersCount' | 'balance'
+export type CustomerSortDir = 'asc' | 'desc'
+
+export interface CustomerFilters {
+  search?: string
+  sortBy?: CustomerSortField
+  sortDir?: CustomerSortDir
+  limit?: number
+  offset?: number
+}
+
+export const fetchCustomers = (params?: CustomerFilters): Promise<CustomersListResponse> =>
   api.get("/customers", { params }).then(r => r.data)
 
 export const fetchCustomerById = (id: string): Promise<Customer> =>

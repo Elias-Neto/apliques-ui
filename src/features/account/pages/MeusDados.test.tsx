@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { vi, type Mock } from 'vitest'
 import { createWrapper } from '@/test/wrappers'
 import { MOCK_ME } from '@/test/msw/handlers/pessoas'
+import { Permission } from '@/types/enums'
 import MeusDados from './MeusDados'
 
 vi.mock('@/contexts/UserContext', () => ({
@@ -11,9 +12,14 @@ vi.mock('@/contexts/UserContext', () => ({
 import { useUser } from '@/contexts/UserContext'
 const mockUseUser = useUser as Mock
 
+// Card "Empresa"/"CNPJ" só renderiza pra quem tem ManagementPermissionGroupsEdit
+// (commit 4737c77 — oculta dado da empresa pra Funcionário). MOCK_ME não tem essa
+// permissão por padrão, então os testes que dependem do card usam esta variante.
+const MOCK_ME_ADMIN = { ...MOCK_ME, permissions: [...MOCK_ME.permissions, Permission.ManagementPermissionGroupsEdit] }
+
 describe('MeusDados page', () => {
   it('exibe dados do usuário logado', () => {
-    mockUseUser.mockReturnValue({ user: MOCK_ME, isLoading: false, error: null, refetch: async () => {} })
+    mockUseUser.mockReturnValue({ user: MOCK_ME_ADMIN, isLoading: false, error: null, refetch: async () => {} })
     render(<MeusDados />, { wrapper: createWrapper() })
     expect(screen.getByText(MOCK_ME.name)).toBeInTheDocument()
     expect(screen.getByText(MOCK_ME.email)).toBeInTheDocument()
@@ -21,7 +27,7 @@ describe('MeusDados page', () => {
   })
 
   it('exibe CNPJ do tenant', () => {
-    mockUseUser.mockReturnValue({ user: MOCK_ME, isLoading: false, error: null, refetch: async () => {} })
+    mockUseUser.mockReturnValue({ user: MOCK_ME_ADMIN, isLoading: false, error: null, refetch: async () => {} })
     render(<MeusDados />, { wrapper: createWrapper() })
     expect(screen.getByText(MOCK_ME.tenant.cnpj)).toBeInTheDocument()
   })
@@ -35,7 +41,7 @@ describe('MeusDados page', () => {
   })
 
   it('exibe "—" para CNPJ ausente', () => {
-    const tenantSemCnpj = { ...MOCK_ME, tenant: { ...MOCK_ME.tenant, cnpj: '' } }
+    const tenantSemCnpj = { ...MOCK_ME_ADMIN, tenant: { ...MOCK_ME.tenant, cnpj: '' } }
     mockUseUser.mockReturnValue({ user: tenantSemCnpj, isLoading: false, error: null, refetch: async () => {} })
     render(<MeusDados />, { wrapper: createWrapper() })
     expect(screen.getByText('—')).toBeInTheDocument()

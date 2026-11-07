@@ -21,12 +21,12 @@ export function NotinhaPedidoDialog({ order, open, onOpenChange }: NotinhaPedido
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm max-h-[85vh] overflow-hidden grid-rows-[auto_1fr_auto]">
         <DialogHeader>
           <DialogTitle>Notinha do pedido</DialogTitle>
         </DialogHeader>
 
-        <div className="flex justify-center bg-slate-50 rounded-2xl p-3">
+        <div className="flex justify-center items-start bg-slate-50 rounded-2xl p-3 overflow-y-auto min-h-0">
           <NotinhaPedidoCard ref={cardRef} order={order} tenantName={user?.tenant.name ?? ''} />
         </div>
 

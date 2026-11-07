@@ -41,7 +41,6 @@ describe('NotinhaPedidoDialog', () => {
 
   it('renderiza o card da notinha dentro do dialog', () => {
     render(<NotinhaPedidoDialog order={ORDER} open onOpenChange={vi.fn()} />)
-    expect(screen.getByText('Romero Borrachado')).toBeInTheDocument()
     expect(screen.getByText(/Couro PU · Verde/)).toBeInTheDocument()
   })
 

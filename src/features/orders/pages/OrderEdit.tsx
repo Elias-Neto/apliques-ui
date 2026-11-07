@@ -17,7 +17,7 @@ export default function OrderEdit() {
     // customerID não é editável (AC-08) — a API rejeita esse campo no PATCH.
     // OrderForm é compartilhado com a criação e sempre inclui customerID; removemos aqui.
     const { orderDate, items, observation } = data
-    updateMutate({ id, data: { orderDate, items, observation } }, { onSuccess: () => navigate(`/apliques/producao/${id}`) })
+    updateMutate({ id, data: { orderDate, items, observation } }, { onSuccess: () => navigate(`/apliques/producao/${id}`, { replace: true }) })
   }
 
   if (isLoading) {
@@ -43,7 +43,7 @@ export default function OrderEdit() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-lg space-y-6">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/apliques/producao/${id}`)}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/apliques/producao/${id}`, { replace: true })}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">Editar pedido</h1>
@@ -52,7 +52,7 @@ export default function OrderEdit() {
         <OrderForm
           initialData={order}
           onSubmit={handleUpdate}
-          onCancel={() => navigate(`/apliques/producao/${id}`)}
+          onCancel={() => navigate(`/apliques/producao/${id}`, { replace: true })}
           submitLabel="Salvar"
           isLoading={isUpdating}
         />

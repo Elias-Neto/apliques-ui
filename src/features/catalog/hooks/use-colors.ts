@@ -1,9 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/toast/use-toast"
-import { fetchColors, createColor, updateColor, deleteColor } from "../color.service"
+import { fetchColors, createColor, updateColor, deleteColor, ColorFilters } from "../color.service"
 
-export const useFetchColors = () =>
-  useQuery({ queryKey: ["colors"], queryFn: fetchColors })
+export const useFetchColors = (filters?: ColorFilters) =>
+  useQuery({
+    queryKey: ["colors", filters],
+    queryFn: () => fetchColors(filters),
+    placeholderData: keepPreviousData,
+  })
 
 export const useCreateColor = () => {
   const qc = useQueryClient()

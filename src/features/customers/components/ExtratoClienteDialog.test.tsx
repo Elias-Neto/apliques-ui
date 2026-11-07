@@ -68,7 +68,7 @@ describe('ExtratoClienteDialog', () => {
 
     await user.click(screen.getByRole('button', { name: /gerar extrato/i }))
 
-    expect(screen.getByText('Extrato de cobrança')).toBeInTheDocument()
+    expect(screen.getByText('Extrato do cliente')).toBeInTheDocument()
     expect(screen.getByText(/Período:/)).toBeInTheDocument()
     expect(screen.getByText('João Silva')).toBeInTheDocument()
   })

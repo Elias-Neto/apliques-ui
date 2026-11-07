@@ -32,7 +32,7 @@ const mockUseUser = useUser as Mock
 
 const renderMenu = (permissions: string[] = []) => {
   mockUseUser.mockReturnValue({
-    user: { name: 'Teste', permissions },
+    user: { name: 'Teste', permissions, tenant: { id: 'tenant-1', name: 'Têxtil Nordeste', cnpj: '12.345.678/0001-90' } },
     isLoading: false,
     error: null,
     refetch: async () => {},
@@ -59,7 +59,7 @@ describe('MainMenu — estrutura base (domainSections vazio)', () => {
   })
 
   it('renderiza seção "Minha Empresa" com "Permissões" e "Pessoas"', () => {
-    renderMenu()
+    renderMenu([Permission.ManagementPeopleList, Permission.ManagementPermissionGroupsList])
     expect(screen.getByText('Minha Empresa')).toBeInTheDocument()
     expect(screen.getByText('Permissões')).toBeInTheDocument()
     expect(screen.getByText('Pessoas')).toBeInTheDocument()
@@ -93,10 +93,10 @@ describe('MainMenu — domainSections populado', () => {
     _domainSections = [
       {
         label: 'Produção',
-        items: [{ label: 'Borrachados', href: '/producao/borrachados', icon: () => null as any }],
+        items: [{ label: 'Borrachados', href: '/producao/borrachados', icon: () => null as any, permission: Permission.OrdersRead }],
       },
     ]
-    renderMenu()
+    renderMenu([Permission.OrdersRead])
 
     expect(screen.getByText('Produção')).toBeInTheDocument()
     expect(screen.getByText('Borrachados')).toBeInTheDocument()
@@ -112,10 +112,10 @@ describe('MainMenu — domainSections populado', () => {
 
   it('múltiplas seções de domínio preservam ordem declarada', () => {
     _domainSections = [
-      { label: 'Produção', items: [] },
-      { label: 'Vendas', items: [] },
+      { label: 'Produção', items: [{ label: 'Borrachados', href: '/producao/borrachados', icon: () => null as any, permission: Permission.OrdersRead }] },
+      { label: 'Vendas', items: [{ label: 'Clientes', href: '/vendas/clientes', icon: () => null as any, permission: Permission.CustomersRead }] },
     ]
-    renderMenu()
+    renderMenu([Permission.OrdersRead, Permission.CustomersRead])
 
     const allText = document.body.textContent ?? ''
     const posProducao = allText.indexOf('Produção')

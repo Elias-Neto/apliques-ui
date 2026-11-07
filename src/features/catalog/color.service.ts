@@ -5,8 +5,17 @@ import { ColorCodeFormat } from "./color-code.utils"
 type ColorBody = { name: string; code?: string | null; codeFormat?: ColorCodeFormat | null }
 type ColorPatchBody = Partial<ColorBody>
 
-export const fetchColors = (): Promise<Color[]> =>
-  api.get("/colors").then(r => r.data)
+export type ColorSortField = 'name'
+export type ColorSortDir = 'asc' | 'desc'
+
+export interface ColorFilters {
+  search?: string
+  sortBy?: ColorSortField
+  sortDir?: ColorSortDir
+}
+
+export const fetchColors = (filters?: ColorFilters): Promise<Color[]> =>
+  api.get("/colors", { params: filters }).then(r => r.data)
 
 export const createColor = (body: ColorBody): Promise<Color> =>
   api.post("/colors", body).then(r => r.data)

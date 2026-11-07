@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowDown, ArrowUp, ArrowUpDown, ClipboardList, Trash2 } from "lucide-react"
+import { ClipboardList, Trash2 } from "lucide-react"
 import { Heading } from "@/components/ui/heading"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
 import {
   Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious,
 } from "@/components/ui/pagination"
+import { SortableTableHead } from "@/components/ui/sortable-table-head"
 import { useFetchOrders } from "../hooks/use-fetch-orders"
 import { useUpdateProductionStatus } from "../hooks/use-update-production-status"
 import { useDeleteOrder } from "../hooks/use-delete-order"
@@ -36,30 +37,6 @@ const materialsSummary = (order: Order) =>
 const orderQuantity = (order: Order) => order.items.reduce((sum, i) => sum + i.quantity, 0)
 
 type SortState = { field: OrderSortField; dir: OrderSortDir }
-
-interface SortableHeadProps {
-  label: string
-  sortKey: OrderSortField
-  sort: SortState | null
-  onToggle: (key: OrderSortField) => void
-}
-
-const SortableHead = ({ label, sortKey, sort, onToggle }: SortableHeadProps) => {
-  const active = sort?.field === sortKey
-  const Icon = active && sort ? (sort.dir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown
-  return (
-    <TableHead>
-      <button
-        type="button"
-        className="flex items-center gap-1 hover:text-foreground"
-        onClick={() => onToggle(sortKey)}
-      >
-        {label}
-        <Icon className={`w-3.5 h-3.5 ${active ? '' : 'text-muted-foreground/50'}`} />
-      </button>
-    </TableHead>
-  )
-}
 
 interface StatusSelectProps {
   order: Order
@@ -125,6 +102,10 @@ export default function OrdersList() {
   const [filters, setFilters] = useState<BaseFilters>({})
   const [sort, setSort] = useState<SortState | null>(null)
   const [page, setPage] = useState(1)
+  // Força remount de <OrderFiltersForm> ao limpar pelo empty state (não só pelo
+  // botão "Limpar" interno do próprio form) — reseta o estado visual dos campos
+  // junto com a query, em vez de só zerar a query e deixar o form dessincronizado.
+  const [filtersResetKey, setFiltersResetKey] = useState(0)
   const { data, isLoading } = useFetchOrders({
     ...filters,
     limit: PAGE_SIZE,
@@ -140,6 +121,11 @@ export default function OrdersList() {
     setPage(1)
   }
 
+  const clearAllFilters = () => {
+    handleFilter({})
+    setFiltersResetKey(k => k + 1)
+  }
+
   const toggleSort = (field: OrderSortField) => {
     setSort(prev => (prev?.field === field
       ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
@@ -149,6 +135,10 @@ export default function OrdersList() {
 
   const orders = data?.items ?? []
   const total = data?.total ?? 0
+  // Mesma convenção já usada em Financeiro/Catálogo/Clientes: mensagem de "sem
+  // resultado pro filtro" distinta de "nada cadastrado ainda" (L-03 do test plan
+  // producao-filtro-cor-busca-range.md).
+  const hasActiveFilters = Object.values(filters).some(v => v !== undefined)
   const pageStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const pageEnd = Math.min(page * PAGE_SIZE, total)
   const hasPrevPage = page > 1
@@ -177,16 +167,26 @@ export default function OrdersList() {
       </Heading>
 
       <div className="container mx-auto px-4 py-6 space-y-4">
-        <OrderFiltersForm onFilter={handleFilter} />
+        <OrderFiltersForm key={filtersResetKey} onFilter={handleFilter} />
 
         {orders.length === 0 ? (
-          <EmptyState
-            icon={ClipboardList}
-            title="Nenhum pedido encontrado"
-            description="Cadastre o primeiro pedido para começar."
-            buttonText="Novo Pedido"
-            onButtonClick={() => navigate('/apliques/producao/novo')}
-          />
+          hasActiveFilters ? (
+            <EmptyState
+              icon={ClipboardList}
+              title="Nenhum pedido encontrado"
+              description="Nenhum pedido corresponde a esse filtro."
+              buttonText="Limpar filtros"
+              onButtonClick={clearAllFilters}
+            />
+          ) : (
+            <EmptyState
+              icon={ClipboardList}
+              title="Nenhum pedido cadastrado"
+              description="Cadastre o primeiro pedido para começar."
+              buttonText="Novo Pedido"
+              onButtonClick={() => navigate('/apliques/producao/novo')}
+            />
+          )
         ) : (
           <>
             {/* Desktop/tablet largo (>=768px) — tabela */}
@@ -195,9 +195,9 @@ export default function OrdersList() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Cliente</TableHead>
-                    <SortableHead label="Qtd." sortKey="quantity" sort={sort} onToggle={toggleSort} />
-                    <SortableHead label="Valor" sortKey="totalPrice" sort={sort} onToggle={toggleSort} />
-                    <SortableHead label="Data" sortKey="orderDate" sort={sort} onToggle={toggleSort} />
+                    <SortableTableHead label="Qtd." sortKey="quantity" sort={sort} onToggle={toggleSort} />
+                    <SortableTableHead label="Valor" sortKey="totalPrice" sort={sort} onToggle={toggleSort} />
+                    <SortableTableHead label="Data" sortKey="orderDate" sort={sort} onToggle={toggleSort} />
                     <TableHead>Materiais</TableHead>
                     <TableHead className="w-40">Etapa</TableHead>
                     <TableHead className="w-20" />
