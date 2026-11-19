@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { useShareImage } from "@/hooks/use-share-image"
 import { useUser } from "@/contexts/UserContext"
 import { formatCurrency } from "@/lib/format"
@@ -28,18 +29,23 @@ export function ExtratoClienteDialog({ customer, open, onOpenChange }: ExtratoCl
   const { user } = useUser()
   const [step, setStep] = useState<'period' | 'preview'>('period')
   const [preset, setPreset] = useState<PeriodPreset>('90')
+  const [useCustomDate, setUseCustomDate] = useState(false)
   const [customDate, setCustomDate] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
 
   const today = useMemo(() => new Date(), [])
-  const cutoff = customDate ? parseDateInput(customDate) : presetToCutoffDate(preset, today)
+  const cutoff = useCustomDate && customDate ? parseDateInput(customDate) : presetToCutoffDate(preset, today)
   const preview = useMemo(() => computeExtratoData(customer, cutoff), [customer, cutoff])
 
   const fileName = `extrato-${customer.name.toLowerCase().replace(/\s+/g, '-')}.png`
   const { share, download, isProcessing } = useShareImage(cardRef, fileName)
 
   const handleOpenChange = (next: boolean) => {
-    if (!next) setStep('period')
+    if (!next) {
+      setStep('period')
+      setUseCustomDate(false)
+      setCustomDate('')
+    }
     onOpenChange(next)
   }
 
@@ -61,7 +67,8 @@ export function ExtratoClienteDialog({ customer, open, onOpenChange }: ExtratoCl
                 <Label htmlFor="extrato-preset">Período</Label>
                 <Select
                   value={preset}
-                  onValueChange={v => { setPreset(v as PeriodPreset); setCustomDate('') }}
+                  onValueChange={v => setPreset(v as PeriodPreset)}
+                  disabled={useCustomDate}
                 >
                   <SelectTrigger id="extrato-preset"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -72,14 +79,34 @@ export function ExtratoClienteDialog({ customer, open, onOpenChange }: ExtratoCl
                 </Select>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="extrato-data">Ou escolher outra data</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="extrato-usar-data"
+                    checked={useCustomDate}
+                    onCheckedChange={checked => {
+                      const on = checked === true
+                      setUseCustomDate(on)
+                      if (!on) setCustomDate('')
+                    }}
+                  />
+                  <Label htmlFor="extrato-usar-data" className="font-normal cursor-pointer">
+                    Escolher uma data específica
+                  </Label>
+                </div>
                 <Input
                   id="extrato-data"
                   type="date"
+                  aria-label="A partir de"
                   value={customDate}
+                  disabled={!useCustomDate}
                   onChange={e => setCustomDate(e.target.value)}
                 />
+                {useCustomDate && (
+                  <p className="text-xs text-muted-foreground">
+                    O extrato vai desta data em diante — não só do dia escolhido. O que veio antes entra como saldo anterior.
+                  </p>
+                )}
               </div>
 
               <div className="bg-muted/40 rounded-xl p-3 flex justify-between items-center">

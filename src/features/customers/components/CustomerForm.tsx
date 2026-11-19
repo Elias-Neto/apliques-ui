@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { formatPhone } from "@/lib/masks"
 import { Customer } from "../customer.types"
 import { customerCreateSchema, TypeCustomerCreateForm } from "../customer.schema"
 
@@ -15,7 +16,7 @@ interface CustomerFormProps {
 }
 
 export function CustomerForm({ initialData, onSubmit, submitLabel, isLoading = false }: CustomerFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<TypeCustomerCreateForm>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<TypeCustomerCreateForm>({
     resolver: zodResolver(customerCreateSchema),
     defaultValues: {
       name: initialData?.name ?? "",
@@ -24,6 +25,8 @@ export function CustomerForm({ initialData, onSubmit, submitLabel, isLoading = f
       observation: initialData?.observation ?? "",
     },
   })
+
+  const phone = watch("phone")
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -35,7 +38,14 @@ export function CustomerForm({ initialData, onSubmit, submitLabel, isLoading = f
 
       <div className="space-y-2">
         <Label htmlFor="phone">Telefone</Label>
-        <Input id="phone" {...register("phone")} placeholder="(00) 00000-0000" />
+        <Input
+          id="phone"
+          type="tel"
+          inputMode="tel"
+          value={phone ?? ""}
+          onChange={e => setValue("phone", formatPhone(e.target.value), { shouldValidate: true })}
+          placeholder="(00) 00000-0000"
+        />
       </div>
 
       <div className="space-y-2">

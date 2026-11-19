@@ -50,16 +50,36 @@ describe('ExtratoClienteDialog', () => {
     expect(screen.getByText('R$ 1.000,00')).toBeInTheDocument() // só o1 (100000 centavos) antes do corte de 90 dias
   })
 
-  it('GWT-03.3: escolher data manual sobrepõe o preset e atualiza a prévia ao vivo', () => {
+  it('GWT-03.3: data manual fica bloqueada até marcar o checkbox; ao marcar, sobrepõe o preset e atualiza a prévia', async () => {
+    const user = userEvent.setup()
     render(<ExtratoClienteDialog customer={CUSTOMER} open onOpenChange={vi.fn()} />)
+
+    const dateInput = screen.getByLabelText(/a partir de/i)
+    expect(dateInput).toBeDisabled()
+
+    await user.click(screen.getByLabelText(/escolher uma data específica/i))
+    expect(dateInput).toBeEnabled()
+    expect(screen.getByText(/desta data em diante/i)).toBeInTheDocument()
 
     const dataAntesDeTudo = new Date()
     dataAntesDeTudo.setDate(dataAntesDeTudo.getDate() - 500)
     const isoDate = dataAntesDeTudo.toISOString().split('T')[0]
-
-    fireEvent.change(screen.getByLabelText(/ou escolher outra data/i), { target: { value: isoDate } })
+    fireEvent.change(dateInput, { target: { value: isoDate } })
 
     expect(screen.getByText('R$ 0,00')).toBeInTheDocument() // nada antes de 500 dias atrás
+  })
+
+  it('GWT-03.4: desmarcar o checkbox descarta a data e volta ao preset', async () => {
+    const user = userEvent.setup()
+    render(<ExtratoClienteDialog customer={CUSTOMER} open onOpenChange={vi.fn()} />)
+
+    await user.click(screen.getByLabelText(/escolher uma data específica/i))
+    fireEvent.change(screen.getByLabelText(/a partir de/i), { target: { value: '2000-01-01' } })
+    expect(screen.getByText('R$ 0,00')).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText(/escolher uma data específica/i))
+    expect(screen.getByLabelText(/a partir de/i)).toBeDisabled()
+    expect(screen.getByText('R$ 1.000,00')).toBeInTheDocument() // preset 90 dias de volta
   })
 
   it('EC-T2: ao gerar o extrato, o cutoff escolhido é preservado no preview', async () => {

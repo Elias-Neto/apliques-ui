@@ -7,6 +7,11 @@ export type CustomerSortDir = 'asc' | 'desc'
 
 export interface CustomerFilters {
   search?: string
+  origin?: string
+  ordersCountMin?: number
+  ordersCountMax?: number
+  balanceMin?: number
+  balanceMax?: number
   sortBy?: CustomerSortField
   sortDir?: CustomerSortDir
   limit?: number
@@ -27,3 +32,6 @@ export const updateCustomer = (id: string, body: TypeCustomerUpdateForm): Promis
 
 export const deleteCustomer = (id: string): Promise<void> =>
   api.delete(`/customers/${id}`).then(() => undefined)
+
+export const fetchCustomerOrigins = (): Promise<string[]> =>
+  api.get("/customers/origins").then(r => r.data)

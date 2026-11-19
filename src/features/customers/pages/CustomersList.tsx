@@ -1,11 +1,13 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Users } from "lucide-react"
+import { Pencil, Search, Trash2, Users } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Heading } from "@/components/ui/heading"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import {
@@ -22,6 +24,9 @@ import { SortableTableHead } from "@/components/ui/sortable-table-head"
 import { useFetchCustomers } from "../hooks/use-fetch-customers"
 import { useCreateCustomer } from "../hooks/use-create-customer"
 import { useDeleteCustomer } from "../hooks/use-delete-customer"
+import { useUpdateCustomer } from "../hooks/use-update-customer"
+import { useFetchCustomer } from "../hooks/use-fetch-customer"
+import { useCustomerOrigins } from "../hooks/use-customer-origins"
 import { CustomerForm } from "../components/CustomerForm"
 import { TypeCustomerCreateForm } from "../customer.schema"
 import { CustomerListItem } from "../customer.types"
@@ -32,6 +37,36 @@ const PAGE_SIZE = 20
 const formatCurrency = (centavos: number) =>
   (centavos / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
+// Range de Pedidos é número puro; range de Saldo é R$ → centavos. Vazio = sem filtro (não 0),
+// mesma semântica dos filtros da tela de produção.
+const toUnits = (value: string): number | undefined => {
+  if (!value) return undefined
+  const parsed = parseInt(value, 10)
+  return Number.isNaN(parsed) ? undefined : parsed
+}
+
+const toCents = (value: string): number | undefined => {
+  if (!value) return undefined
+  const cents = Math.round(parseFloat(value.replace(',', '.')) * 100)
+  return Number.isNaN(cents) ? undefined : cents
+}
+
+interface RangeFilters {
+  origin: string
+  ordersCountMin: string
+  ordersCountMax: string
+  balanceMin: string
+  balanceMax: string
+}
+
+const EMPTY_FILTERS: RangeFilters = {
+  origin: 'all',
+  ordersCountMin: '',
+  ordersCountMax: '',
+  balanceMin: '',
+  balanceMax: '',
+}
+
 type SortState = { field: CustomerSortField; dir: CustomerSortDir }
 
 export default function CustomersList() {
@@ -39,9 +74,20 @@ export default function CustomersList() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortState | null>(null)
   const [page, setPage] = useState(1)
+  const [filters, setFilters] = useState<RangeFilters>(EMPTY_FILTERS)
+  const [editingID, setEditingID] = useState<string | null>(null)
+
+  const { data: origins = [] } = useCustomerOrigins()
+  const { data: editingCustomer } = useFetchCustomer(editingID)
+  const { mutate: updateMutate, isPending: isUpdating } = useUpdateCustomer()
 
   const { data, isLoading } = useFetchCustomers({
     search: search.trim() || undefined,
+    origin: filters.origin === 'all' ? undefined : filters.origin,
+    ordersCountMin: toUnits(filters.ordersCountMin),
+    ordersCountMax: toUnits(filters.ordersCountMax),
+    balanceMin: toCents(filters.balanceMin),
+    balanceMax: toCents(filters.balanceMax),
     sortBy: sort?.field,
     sortDir: sort?.dir,
     limit: PAGE_SIZE,
@@ -53,6 +99,22 @@ export default function CustomersList() {
 
   const handleCreate = (data: TypeCustomerCreateForm) => {
     createMutate(data, { onSuccess: () => setShowCreate(false) })
+  }
+
+  const handleUpdate = (form: TypeCustomerCreateForm) => {
+    if (!editingID) return
+    updateMutate({ id: editingID, data: form }, { onSuccess: () => setEditingID(null) })
+  }
+
+  const setFilter = (patch: Partial<RangeFilters>) => {
+    setFilters(prev => ({ ...prev, ...patch }))
+    setPage(1)
+  }
+
+  const clearFilters = () => {
+    setFilters(EMPTY_FILTERS)
+    setSearch('')
+    setPage(1)
   }
 
   const handleSearch = (value: string) => {
@@ -69,7 +131,8 @@ export default function CustomersList() {
 
   const items = data?.items ?? []
   const total = data?.total ?? 0
-  const searchActive = search.trim().length > 0
+  const filtersActive = JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS)
+  const searchActive = search.trim().length > 0 || filtersActive
   const pageStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const pageEnd = Math.min(page * PAGE_SIZE, total)
   const hasPrevPage = page > 1
@@ -112,23 +175,90 @@ export default function CustomersList() {
           />
         ) : (
           <>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome"
-                value={search}
-                onChange={e => handleSearch(e.target.value)}
-                className="pl-9"
-              />
+            <div className="flex flex-wrap gap-3 items-end p-4 rounded-lg border bg-muted/30">
+              <div className="space-y-1 min-w-[200px] flex-1">
+                <Label htmlFor="customer-filter-search" className="text-xs">Buscar</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="customer-filter-search"
+                    placeholder="Buscar por nome"
+                    value={search}
+                    onChange={e => handleSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1 min-w-[160px]">
+                <Label className="text-xs">De onde?</Label>
+                <Select value={filters.origin} onValueChange={v => setFilter({ origin: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os lugares" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os lugares</SelectItem>
+                    {origins.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1 w-full md:w-auto">
+                <Label htmlFor="customer-filter-orders-min" className="text-xs">Pedidos de</Label>
+                <Input
+                  id="customer-filter-orders-min"
+                  type="number" step="1" min={0} placeholder="0"
+                  value={filters.ordersCountMin}
+                  onChange={e => setFilter({ ordersCountMin: e.target.value })}
+                  className="w-full md:w-28"
+                />
+              </div>
+
+              <div className="space-y-1 w-full md:w-auto">
+                <Label htmlFor="customer-filter-orders-max" className="text-xs">até</Label>
+                <Input
+                  id="customer-filter-orders-max"
+                  type="number" step="1" min={0} placeholder="0"
+                  value={filters.ordersCountMax}
+                  onChange={e => setFilter({ ordersCountMax: e.target.value })}
+                  className="w-full md:w-28"
+                />
+              </div>
+
+              <div className="space-y-1 w-full md:w-auto">
+                <Label htmlFor="customer-filter-balance-min" className="text-xs">Saldo de (R$)</Label>
+                <Input
+                  id="customer-filter-balance-min"
+                  type="number" step="0.01" min={0} placeholder="0,00"
+                  value={filters.balanceMin}
+                  onChange={e => setFilter({ balanceMin: e.target.value })}
+                  className="w-full md:w-32"
+                />
+              </div>
+
+              <div className="space-y-1 w-full md:w-auto">
+                <Label htmlFor="customer-filter-balance-max" className="text-xs">até</Label>
+                <Input
+                  id="customer-filter-balance-max"
+                  type="number" step="0.01" min={0} placeholder="0,00"
+                  value={filters.balanceMax}
+                  onChange={e => setFilter({ balanceMax: e.target.value })}
+                  className="w-full md:w-32"
+                />
+              </div>
+
+              <div className="w-full md:w-auto">
+                <Button size="sm" variant="ghost" onClick={clearFilters} className="w-full md:w-auto">Limpar</Button>
+              </div>
             </div>
 
             {items.length === 0 ? (
               <EmptyState
                 icon={Users}
                 title="Nenhum cliente encontrado"
-                description="Nenhum cliente corresponde a essa busca."
-                buttonText="Limpar busca"
-                onButtonClick={() => handleSearch('')}
+                description="Nenhum cliente corresponde aos filtros."
+                buttonText="Limpar filtros"
+                onButtonClick={clearFilters}
               />
             ) : (
               <>
@@ -138,7 +268,7 @@ export default function CustomersList() {
                     <TableHeader>
                       <TableRow>
                         <SortableTableHead label="Nome" sortKey="name" sort={sort} onToggle={toggleSort} />
-                        <TableHead>Origem</TableHead>
+                        <TableHead>De onde?</TableHead>
                         <SortableTableHead label="Pedidos" sortKey="ordersCount" sort={sort} onToggle={toggleSort} />
                         <SortableTableHead label="Saldo" sortKey="balance" sort={sort} onToggle={toggleSort} />
                         <TableHead className="w-24" />
@@ -168,10 +298,14 @@ export default function CustomersList() {
                             )}
                           </TableCell>
                           <TableCell onClick={e => e.stopPropagation()}>
+                            <div className="flex gap-1 justify-end">
+                            <Button size="icon" variant="ghost" aria-label={`Editar ${customer.name}`} onClick={() => setEditingID(customer.id)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
-                                  Excluir
+                                <Button size="icon" variant="ghost" aria-label={`Excluir ${customer.name}`} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -192,6 +326,7 @@ export default function CustomersList() {
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -227,10 +362,13 @@ export default function CustomersList() {
                         >
                           Ver ficha
                         </Button>
+                        <Button size="icon" variant="ghost" aria-label={`Editar ${customer.name}`} onClick={() => setEditingID(customer.id)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive">
-                              Excluir
+                            <Button size="icon" variant="ghost" aria-label={`Excluir ${customer.name}`} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -287,6 +425,23 @@ export default function CustomersList() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Novo Cliente</DialogTitle></DialogHeader>
           <CustomerForm onSubmit={handleCreate} submitLabel="Cadastrar" isLoading={isCreating} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingID} onOpenChange={open => !open && setEditingID(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Editar Cliente</DialogTitle></DialogHeader>
+          {editingCustomer && editingCustomer.id === editingID ? (
+            <CustomerForm
+              key={editingCustomer.id}
+              initialData={editingCustomer}
+              onSubmit={handleUpdate}
+              submitLabel="Salvar"
+              isLoading={isUpdating}
+            />
+          ) : (
+            <div className="h-40 bg-gray-200 rounded animate-pulse" />
+          )}
         </DialogContent>
       </Dialog>
     </div>

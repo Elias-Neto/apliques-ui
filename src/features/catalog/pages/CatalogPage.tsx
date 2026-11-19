@@ -124,16 +124,16 @@ export default function CatalogPage() {
                     </TableHeader>
                     <TableBody>
                       {materials.map(m => (
-                        <TableRow key={m.id}>
+                        <TableRow key={m.id} className="cursor-pointer" onClick={() => setEditMat(m)}>
                           <TableCell className="font-medium">{m.name}</TableCell>
                           <TableCell>
-                            <div className="flex gap-1 justify-end">
+                            <div className="flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
                               <Button size="icon" variant="ghost" onClick={() => setEditMat(m)}>
                                 <Edit2 className="h-4 w-4" />
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                                  <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </AlertDialogTrigger>
@@ -159,15 +159,15 @@ export default function CatalogPage() {
                 {/* Mobile (<768px) — cards */}
                 <div className="md:hidden space-y-3">
                   {materials.map(m => (
-                    <Card key={m.id} className="flex items-center justify-between px-4 py-3">
+                    <Card key={m.id} className="flex items-center justify-between px-4 py-3 cursor-pointer" onClick={() => setEditMat(m)}>
                       <span className="font-medium">{m.name}</span>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                         <Button size="icon" variant="ghost" onClick={() => setEditMat(m)}>
                           <Edit2 className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                            <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -237,7 +237,7 @@ export default function CatalogPage() {
                         const css = c.code ? colorCodeToCSS(c.code, c.codeFormat) : null
                         const label = c.code ? colorCodeDisplayLabel(c.code, c.codeFormat) : null
                         return (
-                          <TableRow key={c.id}>
+                          <TableRow key={c.id} className="cursor-pointer" onClick={() => setEditColor(c)}>
                             <TableCell className="font-medium">{c.name}</TableCell>
                             <TableCell>
                               {c.code && (
@@ -250,13 +250,13 @@ export default function CatalogPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <div className="flex gap-1 justify-end">
+                              <div className="flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
                                 <Button size="icon" variant="ghost" onClick={() => setEditColor(c)}>
                                   <Edit2 className="h-4 w-4" />
                                 </Button>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                                    <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
                                   </AlertDialogTrigger>
@@ -286,7 +286,7 @@ export default function CatalogPage() {
                     const css = c.code ? colorCodeToCSS(c.code, c.codeFormat) : null
                     const label = c.code ? colorCodeDisplayLabel(c.code, c.codeFormat) : null
                     return (
-                      <Card key={c.id} className="flex items-center justify-between px-4 py-3">
+                      <Card key={c.id} className="flex items-center justify-between px-4 py-3 cursor-pointer" onClick={() => setEditColor(c)}>
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{c.name}</span>
                           {c.code && (
@@ -298,13 +298,13 @@ export default function CatalogPage() {
                             </Badge>
                           )}
                         </div>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                           <Button size="icon" variant="ghost" onClick={() => setEditColor(c)}>
                             <Edit2 className="h-4 w-4" />
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                              <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
