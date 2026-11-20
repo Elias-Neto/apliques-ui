@@ -28,7 +28,7 @@ const parseDateInput = (value: string): Date => {
 export function ExtratoClienteDialog({ customer, open, onOpenChange }: ExtratoClienteDialogProps) {
   const { user } = useUser()
   const [step, setStep] = useState<'period' | 'preview'>('period')
-  const [preset, setPreset] = useState<PeriodPreset>('90')
+  const [preset, setPreset] = useState<PeriodPreset>('inicio')
   const [useCustomDate, setUseCustomDate] = useState(false)
   const [customDate, setCustomDate] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)

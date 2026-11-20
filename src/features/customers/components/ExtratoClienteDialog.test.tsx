@@ -44,10 +44,10 @@ describe('ExtratoClienteDialog', () => {
     mockUseShareImage.mockReturnValue({ share: vi.fn(), download: vi.fn(), isProcessing: false })
   })
 
-  it('GWT-03.1: abre com preset "Últimos 90 dias" pré-selecionado e prévia do saldo anterior', () => {
+  it('GWT-03.1: abre com "Desde o início (todo o tempo)" pré-selecionado — nada vira saldo anterior', () => {
     render(<ExtratoClienteDialog customer={CUSTOMER} open onOpenChange={vi.fn()} />)
-    expect(screen.getByText('Últimos 90 dias')).toBeInTheDocument()
-    expect(screen.getByText('R$ 1.000,00')).toBeInTheDocument() // só o1 (100000 centavos) antes do corte de 90 dias
+    expect(screen.getByText('Desde o início (todo o tempo)')).toBeInTheDocument()
+    expect(screen.getByText('R$ 0,00')).toBeInTheDocument() // do início: nada antes do corte
   })
 
   it('GWT-03.3: data manual fica bloqueada até marcar o checkbox; ao marcar, sobrepõe o preset e atualiza a prévia', async () => {
@@ -69,17 +69,18 @@ describe('ExtratoClienteDialog', () => {
     expect(screen.getByText('R$ 0,00')).toBeInTheDocument() // nada antes de 500 dias atrás
   })
 
-  it('GWT-03.4: desmarcar o checkbox descarta a data e volta ao preset', async () => {
+  it('GWT-03.4: desmarcar o checkbox descarta a data e volta ao preset padrão', async () => {
     const user = userEvent.setup()
     render(<ExtratoClienteDialog customer={CUSTOMER} open onOpenChange={vi.fn()} />)
 
     await user.click(screen.getByLabelText(/escolher uma data específica/i))
-    fireEvent.change(screen.getByLabelText(/a partir de/i), { target: { value: '2000-01-01' } })
-    expect(screen.getByText('R$ 0,00')).toBeInTheDocument()
+    // corte 3 dias atrás: o1 (100000) + o2 (50000) - p1 (100000) ficam antes → R$ 500,00
+    fireEvent.change(screen.getByLabelText(/a partir de/i), { target: { value: daysAgo(3).slice(0, 10) } })
+    expect(screen.getByText('R$ 500,00')).toBeInTheDocument()
 
     await user.click(screen.getByLabelText(/escolher uma data específica/i))
     expect(screen.getByLabelText(/a partir de/i)).toBeDisabled()
-    expect(screen.getByText('R$ 1.000,00')).toBeInTheDocument() // preset 90 dias de volta
+    expect(screen.getByText('R$ 0,00')).toBeInTheDocument() // volta pro "desde o início"
   })
 
   it('EC-T2: ao gerar o extrato, o cutoff escolhido é preservado no preview', async () => {
