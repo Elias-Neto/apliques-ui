@@ -5,15 +5,15 @@ import { Heading } from "@/components/ui/heading"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { PermissionGroupCollapsible } from "@/features/permission-group/components/PermissionGroupCollapsible"
-import { useFetchPermissionsByModule } from "@/features/permission-group/hooks/use-fetch-permissions-by-module"
+import { useFetchPermissionsByModules } from "@/features/permission-group/hooks/use-fetch-permissions-by-modules"
 import { useUpdatePermissionGroupPermissions } from "@/features/permission-group/hooks/use-update-permission-group-permissions"
-import { ModuleType } from "@/features/permission-group/permission-group.types"
 import {
   getModuleActiveValue,
   getPermissionValue,
   groupPermissionsByContext,
   buildPermissionUpdatesPerGroup,
-  getModuleLabel,
+  getModuleSectionLabel,
+  PERMISSION_AREAS,
 } from "@/features/permission-group/permission-group.helpers"
 import { Module } from "@/types/enums"
 import { useSubscription } from "@/features/billing/hooks/use-subscription"
@@ -21,26 +21,25 @@ import { Save, X, Settings as SettingsIcon } from "lucide-react"
 
 export default function Settings() {
   const { data: subscription } = useSubscription()
-  const [selectedModule, setSelectedModule] = useState<ModuleType>("")
-  const visibleModules = Object.values(Module).filter(
-    m => m !== Module.Platform || !!subscription?.isPlatformOwner,
+  const visibleAreas = PERMISSION_AREAS.filter(
+    area => !area.modules.includes(Module.Platform) || !!subscription?.isPlatformOwner,
   )
-  const { data: permissions, isLoading, error } = useFetchPermissionsByModule(selectedModule)
+  const [selectedAreaID, setSelectedAreaID] = useState<string>(PERMISSION_AREAS[0].id)
+  const selectedArea = visibleAreas.find(a => a.id === selectedAreaID) ?? visibleAreas[0]
+  const areaModules = selectedArea?.modules ?? []
+  const { data: modulesPermissions, isLoading, error } = useFetchPermissionsByModules(areaModules)
   const { mutateAsync: updatePermissions } = useUpdatePermissionGroupPermissions()
 
+  // pendingChanges: `${groupId}-${permission}` (permissão é única entre módulos).
+  // moduleActiveChanges: `${module}:${groupId}` (o switch "módulo ativo" é por módulo da API).
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({})
   const [moduleActiveChanges, setModuleActiveChanges] = useState<Record<string, boolean>>({})
-  const [hasChanges, setHasChanges] = useState(false)
+  const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(moduleActiveChanges).length > 0
 
   useEffect(() => {
     setPendingChanges({})
     setModuleActiveChanges({})
-    setHasChanges(false)
-  }, [selectedModule])
-
-  const handleModuleChange = (module: ModuleType) => {
-    setSelectedModule(module)
-  }
+  }, [selectedAreaID])
 
   const handlePermissionToggle = (groupId: string, permissionId: string, originalValue: boolean) => {
     const key = `${groupId}-${permissionId}`
@@ -54,23 +53,21 @@ export default function Settings() {
       } else {
         updatedChanges[key] = newValue
       }
-      setHasChanges(Object.keys(updatedChanges).length > 0 || Object.keys(moduleActiveChanges).length > 0)
       return updatedChanges
     })
   }
 
-  const handleModuleActiveToggle = (groupId: string, originalValue: boolean) => {
-    const currentValue = getModuleActiveValue(moduleActiveChanges, groupId, originalValue)
-    const newValue = !currentValue
+  const handleModuleActiveToggle = (module: string, groupId: string, originalValue: boolean) => {
+    const key = `${module}:${groupId}`
+    const newValue = !getModuleActiveValue(moduleActiveChanges, key, originalValue)
 
     setModuleActiveChanges(current => {
       const updatedChanges = { ...current }
       if (newValue === originalValue) {
-        delete updatedChanges[groupId]
+        delete updatedChanges[key]
       } else {
-        updatedChanges[groupId] = newValue
+        updatedChanges[key] = newValue
       }
-      setHasChanges(Object.keys(pendingChanges).length > 0 || Object.keys(updatedChanges).length > 0)
       return updatedChanges
     })
   }
@@ -78,26 +75,43 @@ export default function Settings() {
   const handleCancelChanges = () => {
     setPendingChanges({})
     setModuleActiveChanges({})
-    setHasChanges(false)
   }
 
+  // Um PUT por (módulo, grupo) afetado — mesmo payload de antes; só o agrupamento é da tela.
   const handleApplyChanges = async () => {
-    if (!permissions || (Object.keys(pendingChanges).length === 0 && Object.keys(moduleActiveChanges).length === 0)) return
+    if (!hasChanges) return
 
-    const updates = buildPermissionUpdatesPerGroup({
-      pendingChanges,
-      moduleActiveChanges,
-      permissions,
-      selectedModule,
-    })
+    for (const { module, data } of modulesPermissions) {
+      const modulePermissions = new Set(
+        data.permissionGroups.flatMap(g => g.permissions.map(p => p.permission)),
+      )
 
-    for (const { groupId, payload } of updates) {
-      await updatePermissions({ permissionGroupId: groupId, payload, module: selectedModule })
+      const modulePending = Object.fromEntries(
+        Object.entries(pendingChanges).filter(([key]) => {
+          const permission = key.substring(key.indexOf("-") + 1)
+          return modulePermissions.has(permission)
+        }),
+      )
+      const moduleActive = Object.fromEntries(
+        Object.entries(moduleActiveChanges)
+          .filter(([key]) => key.startsWith(`${module}:`))
+          .map(([key, value]) => [key.substring(module.length + 1), value]),
+      )
+
+      const updates = buildPermissionUpdatesPerGroup({
+        pendingChanges: modulePending,
+        moduleActiveChanges: moduleActive,
+        permissions: data,
+        selectedModule: module,
+      })
+
+      for (const { groupId, payload } of updates) {
+        await updatePermissions({ permissionGroupId: groupId, payload, module })
+      }
     }
 
     setPendingChanges({})
     setModuleActiveChanges({})
-    setHasChanges(false)
   }
 
   const boundGetPermissionValue = useCallback(
@@ -134,29 +148,21 @@ export default function Settings() {
 
       <div className="container mx-auto px-4 py-6 space-y-8">
 
-      {/* Seletor de Módulo */}
+      {/* Seletor de Área (espelha o menu) */}
       <Card className="p-6">
-        {visibleModules.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhum módulo configurado. Popular <code>Module</code> em <code>src/types/enums.ts</code> antes de usar permissionamento.
-          </p>
-        ) : (
-          <div className="flex items-center gap-4">
-            <label className="text-sm font-medium">Módulo:</label>
-            <Select value={selectedModule} onValueChange={handleModuleChange}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {visibleModules.map((moduleValue) => (
-                  <SelectItem key={moduleValue as string} value={moduleValue as string}>
-                    {getModuleLabel(moduleValue as string)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium">Área:</label>
+          <Select value={selectedArea?.id} onValueChange={setSelectedAreaID}>
+            <SelectTrigger className="w-56">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {visibleAreas.map(area => (
+                <SelectItem key={area.id} value={area.id}>{area.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </Card>
 
       {isLoading ? (
@@ -179,38 +185,45 @@ export default function Settings() {
         </div>
       ) : (
         <>
-          {/* Estado Ativo do Módulo por Grupo */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4">Módulo de {getModuleLabel(selectedModule)}</h2>
-            <div className="space-y-3">
-              {permissions?.permissionGroups.map((group) => (
-                <div key={group.id} className="flex items-center justify-between py-2">
-                  <label htmlFor={`module-active-${group.id}`} className="text-sm font-medium">
-                    {group.label}
-                  </label>
-                  <Switch
-                    id={`module-active-${group.id}`}
-                    checked={getModuleActiveValue(moduleActiveChanges, group.id, group.moduleActive)}
-                    onCheckedChange={() => handleModuleActiveToggle(group.id, group.moduleActive)}
-                  />
-                </div>
-              ))}
-            </div>
-          </Card>
+          {modulesPermissions.map(({ module, data }) => {
+            const sectionLabel = areaModules.length > 1 ? getModuleSectionLabel(module) : selectedArea.label
+            return (
+              <section key={module} className="space-y-6">
+                {/* Estado Ativo do Módulo por Grupo */}
+                <Card className="p-6">
+                  <h2 className="text-lg font-semibold mb-4">Módulo de {sectionLabel}</h2>
+                  <div className="space-y-3">
+                    {data.permissionGroups.map(group => (
+                      <div key={group.id} className="flex items-center justify-between py-2">
+                        <label htmlFor={`module-active-${module}-${group.id}`} className="text-sm font-medium">
+                          {group.label}
+                        </label>
+                        <Switch
+                          id={`module-active-${module}-${group.id}`}
+                          checked={getModuleActiveValue(moduleActiveChanges, `${module}:${group.id}`, group.moduleActive)}
+                          onCheckedChange={() => handleModuleActiveToggle(module, group.id, group.moduleActive)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </Card>
 
-          {/* Grupos de Permissões Colapsáveis */}
-          <div className="space-y-6">
-            {permissions && groupPermissionsByContext(permissions).map((contextGroup) => (
-              <PermissionGroupCollapsible
-                key={contextGroup.context}
-                contextLabel={contextGroup.label}
-                permissions={contextGroup.permissions}
-                getPermissionValue={boundGetPermissionValue}
-                onPermissionToggle={handlePermissionToggle}
-                defaultExpanded={false}
-              />
-            ))}
-          </div>
+                {/* Grupos de Permissões Colapsáveis */}
+                <div className="space-y-6">
+                  {groupPermissionsByContext(data).map(contextGroup => (
+                    <PermissionGroupCollapsible
+                      key={contextGroup.context}
+                      contextLabel={contextGroup.label}
+                      permissions={contextGroup.permissions}
+                      getPermissionValue={boundGetPermissionValue}
+                      onPermissionToggle={handlePermissionToggle}
+                      defaultExpanded={false}
+                    />
+                  ))}
+                </div>
+              </section>
+            )
+          })}
 
           {/* Botões Aplicar e Cancelar */}
           {hasChanges && (

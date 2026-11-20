@@ -20,6 +20,7 @@ import {
 import {
   Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious,
 } from "@/components/ui/pagination"
+import { FilterLayout, FilterChip } from "@/components/filters/FilterLayout"
 import { SortableTableHead } from "@/components/ui/sortable-table-head"
 import { useFetchCustomers } from "../hooks/use-fetch-customers"
 import { useCreateCustomer } from "../hooks/use-create-customer"
@@ -129,6 +130,13 @@ export default function CustomersList() {
     setPage(1)
   }
 
+  const rangeLabel = (name: string, min: string, max: string) =>
+    min && max ? `${name} ${min}–${max}` : min ? `${name} ≥ ${min}` : `${name} ≤ ${max}`
+  const chips: FilterChip[] = []
+  if (filters.origin !== 'all') chips.push({ key: 'origin', label: filters.origin, onRemove: () => setFilter({ origin: 'all' }) })
+  if (filters.ordersCountMin || filters.ordersCountMax) chips.push({ key: 'orders', label: rangeLabel('Pedidos', filters.ordersCountMin, filters.ordersCountMax), onRemove: () => setFilter({ ordersCountMin: '', ordersCountMax: '' }) })
+  if (filters.balanceMin || filters.balanceMax) chips.push({ key: 'balance', label: rangeLabel('Saldo R$', filters.balanceMin, filters.balanceMax), onRemove: () => setFilter({ balanceMin: '', balanceMax: '' }) })
+
   const items = data?.items ?? []
   const total = data?.total ?? 0
   const filtersActive = JSON.stringify(filters) !== JSON.stringify(EMPTY_FILTERS)
@@ -175,22 +183,24 @@ export default function CustomersList() {
           />
         ) : (
           <>
-            <div className="flex flex-wrap gap-3 items-end p-4 rounded-lg border bg-muted/30">
-              <div className="space-y-1 min-w-[200px] flex-1">
-                <Label htmlFor="customer-filter-search" className="text-xs">Buscar</Label>
+            <FilterLayout
+                      onClear={clearFilters}
+              chips={chips}
+              search={
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="customer-filter-search"
+                    aria-label="Buscar por nome"
                     placeholder="Buscar por nome"
                     value={search}
                     onChange={e => handleSearch(e.target.value)}
                     className="pl-9"
                   />
                 </div>
-              </div>
+              }
+            >
 
-              <div className="space-y-1 min-w-[160px]">
+              <div className="space-y-1 col-span-2 md:col-span-1 md:min-w-[160px]">
                 <Label className="text-xs">De onde?</Label>
                 <Select value={filters.origin} onValueChange={v => setFilter({ origin: v })}>
                   <SelectTrigger>
@@ -203,7 +213,7 @@ export default function CustomersList() {
                 </Select>
               </div>
 
-              <div className="space-y-1 w-full md:w-auto">
+              <div className="space-y-1 md:w-auto">
                 <Label htmlFor="customer-filter-orders-min" className="text-xs">Pedidos de</Label>
                 <Input
                   id="customer-filter-orders-min"
@@ -214,7 +224,7 @@ export default function CustomersList() {
                 />
               </div>
 
-              <div className="space-y-1 w-full md:w-auto">
+              <div className="space-y-1 md:w-auto">
                 <Label htmlFor="customer-filter-orders-max" className="text-xs">até</Label>
                 <Input
                   id="customer-filter-orders-max"
@@ -225,7 +235,7 @@ export default function CustomersList() {
                 />
               </div>
 
-              <div className="space-y-1 w-full md:w-auto">
+              <div className="space-y-1 md:w-auto">
                 <Label htmlFor="customer-filter-balance-min" className="text-xs">Saldo de (R$)</Label>
                 <Input
                   id="customer-filter-balance-min"
@@ -236,7 +246,7 @@ export default function CustomersList() {
                 />
               </div>
 
-              <div className="space-y-1 w-full md:w-auto">
+              <div className="space-y-1 md:w-auto">
                 <Label htmlFor="customer-filter-balance-max" className="text-xs">até</Label>
                 <Input
                   id="customer-filter-balance-max"
@@ -246,11 +256,7 @@ export default function CustomersList() {
                   className="w-full md:w-32"
                 />
               </div>
-
-              <div className="w-full md:w-auto">
-                <Button size="sm" variant="ghost" onClick={clearFilters} className="w-full md:w-auto">Limpar</Button>
-              </div>
-            </div>
+            </FilterLayout>
 
             {items.length === 0 ? (
               <EmptyState

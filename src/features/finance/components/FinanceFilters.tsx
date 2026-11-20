@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Search } from "lucide-react"
+import { FilterLayout, FilterChip } from "@/components/filters/FilterLayout"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FinanceFilters as FinanceFiltersState } from "../finance.service"
@@ -74,19 +75,47 @@ export function FinanceFilters({ onFilter }: FinanceFiltersProps) {
     onFilter({})
   }
 
-  return (
-    <div className="flex flex-wrap gap-3 items-end p-4 rounded-lg border bg-muted/30">
-      <div className="space-y-1 min-w-[200px] flex-1">
-        <Label htmlFor="finance-filter-search" className="text-xs">Cliente</Label>
-        <Input
-          id="finance-filter-search"
-          placeholder="Buscar por nome..."
-          value={search}
-          onChange={e => handleSearch(e.target.value)}
-        />
-      </div>
 
-      <div className="space-y-1 w-full md:w-auto">
+  const patchFilters = (p: Partial<{ orderedMin: string; orderedMax: string; balanceMin: string; balanceMax: string }>) => {
+    const next = { search, orderedMin, orderedMax, balanceMin, balanceMax, ...p }
+    if (p.orderedMin !== undefined) setOrderedMin(p.orderedMin)
+    if (p.orderedMax !== undefined) setOrderedMax(p.orderedMax)
+    if (p.balanceMin !== undefined) setBalanceMin(p.balanceMin)
+    if (p.balanceMax !== undefined) setBalanceMax(p.balanceMax)
+    emit(next)
+  }
+
+  const rangeLabel = (name: string, min: string, max: string) =>
+    min && max ? `${name} ${min}–${max}` : min ? `${name} ≥ ${min}` : `${name} ≤ ${max}`
+
+  const chips: FilterChip[] = []
+  if (orderedMin || orderedMax) chips.push({ key: 'ordered', label: rangeLabel('Pedidos R$', orderedMin, orderedMax), onRemove: () => patchFilters({ orderedMin: '', orderedMax: '' }) })
+  if (balanceMin || balanceMax) chips.push({ key: 'balance', label: rangeLabel('Saldo R$', balanceMin, balanceMax), onRemove: () => patchFilters({ balanceMin: '', balanceMax: '' }) })
+
+  const searchField = (
+    <Input
+      id="finance-filter-search"
+      aria-label="Cliente"
+      placeholder="Buscar por nome"
+      value={search}
+      onChange={e => handleSearch(e.target.value)}
+      className="pl-9"
+    />
+  )
+
+  return (
+    <FilterLayout
+      onClear={clear}
+      chips={chips}
+      search={
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {searchField}
+        </div>
+      }
+    >
+
+      <div className="space-y-1 md:w-auto">
         <Label htmlFor="finance-filter-ordered-min" className="text-xs">Pedidos de (R$)</Label>
         <Input
           id="finance-filter-ordered-min"
@@ -97,7 +126,7 @@ export function FinanceFilters({ onFilter }: FinanceFiltersProps) {
         />
       </div>
 
-      <div className="space-y-1 w-full md:w-auto">
+      <div className="space-y-1 md:w-auto">
         <Label htmlFor="finance-filter-ordered-max" className="text-xs">até</Label>
         <Input
           id="finance-filter-ordered-max"
@@ -108,7 +137,7 @@ export function FinanceFilters({ onFilter }: FinanceFiltersProps) {
         />
       </div>
 
-      <div className="space-y-1 w-full md:w-auto">
+      <div className="space-y-1 md:w-auto">
         <Label htmlFor="finance-filter-balance-min" className="text-xs">Saldo de (R$)</Label>
         <Input
           id="finance-filter-balance-min"
@@ -119,7 +148,7 @@ export function FinanceFilters({ onFilter }: FinanceFiltersProps) {
         />
       </div>
 
-      <div className="space-y-1 w-full md:w-auto">
+      <div className="space-y-1 md:w-auto">
         <Label htmlFor="finance-filter-balance-max" className="text-xs">até</Label>
         <Input
           id="finance-filter-balance-max"
@@ -129,10 +158,6 @@ export function FinanceFilters({ onFilter }: FinanceFiltersProps) {
           className="w-full md:w-32"
         />
       </div>
-
-      <div className="w-full md:w-auto">
-        <Button size="sm" variant="ghost" onClick={clear} className="w-full md:w-auto">Limpar</Button>
-      </div>
-    </div>
+    </FilterLayout>
   )
 }

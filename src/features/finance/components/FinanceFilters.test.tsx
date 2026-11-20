@@ -3,13 +3,16 @@ import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 import { FinanceFilters } from './FinanceFilters'
 
+const openFilters = (user: ReturnType<typeof userEvent.setup>) =>
+  user.click(screen.getByRole('button', { name: /^filtros/i }))
+
 describe('FinanceFilters', () => {
   it('busca por nome emite search sem tocar nos ranges', async () => {
     const onFilter = vi.fn()
     const user = userEvent.setup()
     render(<FinanceFilters onFilter={onFilter} />)
 
-    await user.type(screen.getByPlaceholderText('Buscar por nome...'), 'Josimar')
+    await user.type(screen.getByPlaceholderText('Buscar por nome'), 'Josimar')
 
     expect(onFilter).toHaveBeenLastCalledWith({
       search: 'Josimar',
@@ -25,6 +28,7 @@ describe('FinanceFilters', () => {
     const user = userEvent.setup()
     render(<FinanceFilters onFilter={onFilter} />)
 
+    await openFilters(user)
     await user.type(screen.getByLabelText('Pedidos de (R$)'), '1234.56')
 
     expect(onFilter).toHaveBeenLastCalledWith(
@@ -37,6 +41,7 @@ describe('FinanceFilters', () => {
     const user = userEvent.setup()
     render(<FinanceFilters onFilter={onFilter} />)
 
+    await openFilters(user)
     await user.type(screen.getByLabelText('Saldo de (R$)'), '5')
     await user.clear(screen.getByLabelText('Saldo de (R$)'))
 
@@ -50,10 +55,11 @@ describe('FinanceFilters', () => {
     const user = userEvent.setup()
     render(<FinanceFilters onFilter={onFilter} />)
 
-    await user.type(screen.getByPlaceholderText('Buscar por nome...'), 'Josimar')
+    await user.type(screen.getByPlaceholderText('Buscar por nome'), 'Josimar')
+    await openFilters(user)
     await user.click(screen.getByRole('button', { name: 'Limpar' }))
 
     expect(onFilter).toHaveBeenLastCalledWith({})
-    expect(screen.getByPlaceholderText('Buscar por nome...')).toHaveValue('')
+    expect(screen.getByPlaceholderText('Buscar por nome')).toHaveValue('')
   })
 })

@@ -163,14 +163,14 @@ export default function OrderDetail() {
         </div>
 
         {/* Ações */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={() => navigate(`/apliques/producao/${id}/editar`)}>
             <Edit2 className="h-4 w-4 mr-2" /> Editar pedido
           </Button>
 
           {/* Gerar notinha (PRD-02) */}
           <Button
-            className="flex-1 bg-slate-800 hover:bg-slate-700"
+            className="sm:flex-1 bg-slate-800 hover:bg-slate-700"
             onClick={() => setShowNotinha(true)}
           >
             <Receipt className="h-4 w-4 mr-2" /> Gerar notinha

@@ -39,7 +39,7 @@ export function DesignsSection({ customerID }: DesignsSectionProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Desenhos</h3>
         <Button size="sm" variant="outline" onClick={() => setShowAddModal(true)}>
           <Plus className="h-4 w-4 mr-1" /> Novo desenho

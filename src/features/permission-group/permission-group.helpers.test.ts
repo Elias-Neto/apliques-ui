@@ -1,5 +1,7 @@
 import {
   getModuleLabel,
+  getModuleSectionLabel,
+  PERMISSION_AREAS,
   getModuleActiveValue,
   getPermissionValue,
   groupPermissionsByContext,
@@ -103,5 +105,27 @@ describe('buildPermissionUpdatesPerGroup', () => {
     })
     expect(result).toHaveLength(1)
     expect(result[0].payload.active).toBe(false)
+  })
+})
+
+describe('PERMISSION_AREAS', () => {
+  it('todo módulo do enum Module pertence a exatamente uma área', async () => {
+    const { Module } = await import('@/types/enums')
+    const all = PERMISSION_AREAS.flatMap(a => a.modules)
+    Object.values(Module).forEach(m => {
+      expect(all.filter(x => x === m)).toHaveLength(1)
+    })
+  })
+
+  it('espelha o menu: Produção, Clientes (com Pagamentos e Desenhos), Catálogo (Materiais e Cores)', () => {
+    const byLabel = Object.fromEntries(PERMISSION_AREAS.map(a => [a.label, a.modules]))
+    expect(byLabel['Produção']).toEqual(['orders'])
+    expect(byLabel['Clientes']).toEqual(['customers', 'payments', 'designs'])
+    expect(byLabel['Catálogo']).toEqual(['materials', 'colors'])
+  })
+
+  it('título de seção para módulos agregados', () => {
+    expect(getModuleSectionLabel('payments')).toBe('Pagamentos')
+    expect(getModuleSectionLabel('colors')).toBe('Cores')
   })
 })

@@ -139,10 +139,10 @@ export default function CustomerDetail() {
 
         {/* Pagamentos (ledger do cliente) */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Pagamentos</h3>
             <Button size="sm" variant="outline" onClick={() => setShowAddPayment(true)}>
-              <Plus className="h-4 w-4 mr-1" /> Registrar pagamento
+              <Plus className="h-4 w-4 mr-1" /> Novo pagamento
             </Button>
           </div>
 

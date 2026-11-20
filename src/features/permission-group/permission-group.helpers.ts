@@ -14,6 +14,33 @@ const MODULE_LABELS: Record<string, string> = {
   [Module.Finance]:   'Financeiro',
 }
 
+// Áreas do seletor de Permissões — espelham o menu (Produção, Clientes, Catálogo…), não os
+// módulos técnicos da API. Cada área agrega 1+ módulos; as permissões salvas no banco
+// (ex: `customers.read`) e o endpoint por módulo continuam exatamente os mesmos.
+export type PermissionArea = { id: string; label: string; modules: string[] }
+
+export const PERMISSION_AREAS: PermissionArea[] = [
+  { id: 'producao', label: 'Produção', modules: [Module.Orders] },
+  { id: 'clientes', label: 'Clientes', modules: [Module.Customers, Module.Payments, Module.Designs] },
+  { id: 'catalogo', label: 'Catálogo', modules: [Module.Materials, Module.Colors] },
+  { id: 'financeiro', label: 'Financeiro', modules: [Module.Finance] },
+  { id: 'mensalidade', label: 'Minha mensalidade', modules: [Module.Billing] },
+  { id: 'empresa', label: 'Minha empresa', modules: [Module.Management] },
+  { id: 'plataforma', label: 'Plataforma', modules: [Module.Platform] },
+]
+
+// Título da seção quando a área agrega mais de um módulo.
+const MODULE_SECTION_LABELS: Record<string, string> = {
+  [Module.Customers]: 'Clientes',
+  [Module.Payments]: 'Pagamentos',
+  [Module.Designs]: 'Desenhos',
+  [Module.Materials]: 'Materiais',
+  [Module.Colors]: 'Cores',
+}
+
+export const getModuleSectionLabel = (moduleValue: string): string =>
+  MODULE_SECTION_LABELS[moduleValue] ?? getModuleLabel(moduleValue)
+
 export const getModuleLabel = (moduleValue: string): string =>
   MODULE_LABELS[moduleValue] ?? moduleValue
 

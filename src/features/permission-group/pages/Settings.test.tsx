@@ -22,6 +22,17 @@ describe('Settings page', () => {
     expect(screen.queryByRole('option', { name: 'billing' })).not.toBeInTheDocument()
   })
 
+  it('seletor espelha as áreas do menu (Produção, Clientes, Catálogo, Financeiro)', async () => {
+    const user = userEvent.setup()
+    render(<Settings />, { wrapper: createWrapper() })
+    await user.click(screen.getByRole('combobox'))
+    ;['Produção', 'Clientes', 'Catálogo', 'Financeiro'].forEach(label =>
+      expect(screen.getByRole('option', { name: label })).toBeInTheDocument(),
+    )
+    expect(screen.queryByRole('option', { name: 'Pedidos' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Catálogo — /i })).not.toBeInTheDocument()
+  })
+
   it('renderiza permissões após selecionar módulo', async () => {
     const user = userEvent.setup()
     render(<Settings />, { wrapper: createWrapper() })
