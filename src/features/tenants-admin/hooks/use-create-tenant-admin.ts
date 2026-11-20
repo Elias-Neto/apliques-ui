@@ -12,11 +12,11 @@ const useCreateTenantAdmin = () => {
     mutationFn: createTenantAdmin,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'tenants'] })
-      toast({ title: 'Tenant criado', description: 'Novo tenant cadastrado com sucesso.' })
+      toast({ title: 'Inquilino criado', description: 'Novo inquilino cadastrado com sucesso.' })
     },
     onError: () =>
       toast({
-        title: 'Erro ao criar tenant',
+        title: 'Erro ao criar inquilino',
         description: 'Verifique os dados e tente novamente.',
         variant: 'destructive',
       }),

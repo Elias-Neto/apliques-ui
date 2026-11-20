@@ -8,8 +8,8 @@ export default function BillingAdmin() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Heading description="Gerencie a cobrança de todos os tenants" showButton={false}>
-        Billing
+      <Heading description="Gerencie as mensalidades de todos os inquilinos" showButton={false}>
+        Mensalidades
       </Heading>
 
       <div className="container mx-auto px-4 py-6 space-y-6">
@@ -25,7 +25,7 @@ export default function BillingAdmin() {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <KpiCard title="Tenants ativos" value={data?.kpis.active ?? 0} />
+              <KpiCard title="Inquilinos ativos" value={data?.kpis.active ?? 0} />
               <KpiCard
                 title="Em atraso"
                 value={data?.kpis.overdue ?? 0}
@@ -62,7 +62,7 @@ export default function BillingAdmin() {
                   {(data?.tenants ?? []).length === 0 ? (
                     <tr>
                       <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                        Nenhum tenant cadastrado.
+                        Nenhum inquilino cadastrado.
                       </td>
                     </tr>
                   ) : (

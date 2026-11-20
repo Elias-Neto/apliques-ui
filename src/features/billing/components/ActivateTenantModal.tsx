@@ -91,14 +91,14 @@ export function ActivateTenantModal({ tenant, open, onClose }: ActivateTenantMod
                 Cancelar
               </Button>
               <Button onClick={handleConfirm} disabled={!canConfirm || isPending}>
-                {isPending ? "Ativando..." : "Ativar billing"}
+                {isPending ? "Ativando..." : "Ativar mensalidade"}
               </Button>
             </DialogFooter>
           </div>
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-emerald-700 font-medium">
-              Billing ativado! Dia de cobrança: <strong>{result.billingDay}</strong>. Primeiro
+              Mensalidade ativada! Dia de cobrança: <strong>{result.billingDay}</strong>. Primeiro
               vencimento: <strong>{formatDate(result.nextBillingAt)}</strong>.
             </p>
             <DialogFooter>

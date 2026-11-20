@@ -78,12 +78,12 @@ export default function TenantsAdmin() {
   return (
     <div className="min-h-screen bg-background">
       <Heading
-        description="Gerencie os tenants da plataforma"
+        description="Gerencie os inquilinos da plataforma"
         showButton
-        buttonText="Novo tenant"
+        buttonText="Novo inquilino"
         onButtonClick={() => setShowCreateModal(true)}
       >
-        Tenants
+        Inquilinos
       </Heading>
 
       <div className="container mx-auto px-4 py-6">
@@ -108,7 +108,7 @@ export default function TenantsAdmin() {
                 {tenants.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
-                      Nenhum tenant cadastrado.
+                      Nenhum inquilino cadastrado.
                     </td>
                   </tr>
                 ) : (

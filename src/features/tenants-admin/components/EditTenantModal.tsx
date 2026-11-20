@@ -68,7 +68,7 @@ export function EditTenantModal({ tenant, onClose }: EditTenantModalProps) {
     <Dialog open={!!tenant} onOpenChange={handleClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Editar tenant</DialogTitle>
+          <DialogTitle>Editar inquilino</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">

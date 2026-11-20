@@ -57,7 +57,7 @@ export function TenantBillingRow({ tenant }: TenantBillingRowProps) {
           ) : (
             <span
               className="text-amber-600"
-              title="Dia de cobrança não definido — ative o billing para configurar"
+              title="Dia de cobrança não definido — ative a mensalidade para configurar"
             >
               —
             </span>

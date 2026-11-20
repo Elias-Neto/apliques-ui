@@ -186,12 +186,12 @@ export function MainMenu({ className }: MainMenuProps) {
                     <MenuSection title="Plataforma" isCollapsed={isCollapsed}>
                       {canSeeTenantsAdmin && (
                         <MenuItem href="/admin/tenants" icon={<Users className="h-full w-full" />} isCollapsed={isCollapsed}>
-                          Tenants
+                          Inquilinos
                         </MenuItem>
                       )}
                       {canSeeBillingAdmin && (
                         <MenuItem href="/admin/billing" icon={<LayoutDashboard className="h-full w-full" />} isCollapsed={isCollapsed}>
-                          Billing
+                          Mensalidades
                         </MenuItem>
                       )}
                     </MenuSection>

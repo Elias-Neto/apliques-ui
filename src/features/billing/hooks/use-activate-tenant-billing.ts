@@ -9,11 +9,11 @@ export const useActivateTenantBilling = () => {
     mutationFn: activateTenantBilling,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["billing", "admin", "tenants"] })
-      toast({ title: "Billing ativado", description: "Tenant ativado para cobrança com sucesso." })
+      toast({ title: "Mensalidade ativada", description: "Inquilino ativado para cobrança com sucesso." })
     },
     onError: () =>
       toast({
-        title: "Erro ao ativar billing",
+        title: "Erro ao ativar mensalidade",
         description: "Tente novamente.",
         variant: "destructive",
       }),

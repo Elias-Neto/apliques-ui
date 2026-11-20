@@ -10,10 +10,10 @@ export function useEditTenantAdmin() {
     mutationFn: editTenantAdmin,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'tenants'] })
-      toast({ description: 'Tenant atualizado.' })
+      toast({ description: 'Inquilino atualizado.' })
     },
     onError: () => {
-      toast({ description: 'Erro ao atualizar tenant. Tente novamente.' })
+      toast({ description: 'Erro ao atualizar inquilino. Tente novamente.' })
     },
   })
 

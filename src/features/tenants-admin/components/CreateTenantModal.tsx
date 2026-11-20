@@ -91,7 +91,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Novo tenant</DialogTitle>
+          <DialogTitle>Novo inquilino</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -200,7 +200,7 @@ export function CreateTenantModal({ open, onClose }: CreateTenantModalProps) {
             Cancelar
           </Button>
           <Button onClick={handleSubmit} disabled={!canSubmit || isPending}>
-            {isPending ? 'Criando...' : 'Criar tenant'}
+            {isPending ? 'Criando...' : 'Criar inquilino'}
           </Button>
         </DialogFooter>
       </DialogContent>
