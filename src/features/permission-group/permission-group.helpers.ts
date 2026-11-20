@@ -80,20 +80,19 @@ export const groupPermissionsByContext = (permissions: PermissionsResponse) =>
             const permissionLabel = context.permissions.find(
               p => p.permission === permission.permission,
             )?.label
-            if (permissionLabel) {
-              contextPermissions.push({
-                groupId: group.id,
-                groupLabel: group.label,
-                permission: permission.permission,
-                label: permissionLabel,
-                active: permission.active,
-              })
-            }
+            // Sem label vindo da API, mostra a chave técnica em vez de sumir com o toggle.
+            contextPermissions.push({
+              groupId: group.id,
+              groupLabel: group.label,
+              permission: permission.permission,
+              label: permissionLabel ?? permission.permission,
+              active: permission.active,
+            })
           }
         })
       })
 
-      return { context: context.context, label: context.label, permissions: contextPermissions }
+      return { context: context.context, label: context.label ?? context.context, permissions: contextPermissions }
     })
     .filter(c => c.permissions.length > 0)
 

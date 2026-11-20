@@ -45,6 +45,23 @@ describe('Settings page', () => {
     expect(groupLabels.length).toBeGreaterThan(0)
   })
 
+  it('switch do módulo é derivado das permissões e desliga todas e religa todas de uma vez', async () => {
+    const user = userEvent.setup()
+    render(<Settings />, { wrapper: createWrapper() })
+
+    const moduleSwitch = await screen.findByRole('switch', { name: 'Operador' })
+    expect(moduleSwitch).toBeChecked() // mock: 1 permissão ligada → módulo ligado
+
+    await user.click(moduleSwitch)
+    expect(moduleSwitch).not.toBeChecked()
+    expect(screen.getByRole('button', { name: /aplicar alterações/i })).toBeInTheDocument()
+
+    // ligar de novo libera TODAS as permissões do grupo (inclusive a que estava desligada)
+    await user.click(moduleSwitch)
+    expect(moduleSwitch).toBeChecked()
+    expect(screen.getByRole('button', { name: /aplicar alterações/i })).toBeInTheDocument()
+  })
+
   it('exibe skeleton enquanto carrega permissões', async () => {
     server.use(
       rest.get('http://localhost:3000/management/permission-groups/permissions', (_req, res, ctx) =>

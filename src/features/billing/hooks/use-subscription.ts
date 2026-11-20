@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { fetchSubscription } from "../billing.service"
 
-export const useSubscription = () =>
+// `enabled=false` evita o GET /me/subscription (403) pra quem não tem billing.me.show (ex: funcionário).
+export const useSubscription = (enabled = true) =>
   useQuery({
+    enabled,
     queryKey: ["billing", "subscription"],
     queryFn: fetchSubscription,
     retry: false,

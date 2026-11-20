@@ -22,11 +22,15 @@ import { SubscriptionBanner } from "@/features/billing/components/SubscriptionBa
 import { RegularizacaoView } from "@/features/billing/components/RegularizacaoView"
 import { useSubscription } from "@/features/billing/hooks/use-subscription"
 import { useUser } from "@/contexts/UserContext"
+import { Permission } from "@/types/enums"
 
 export const ProtectedRoutesLayout = () => {
   const { isCollapsed } = useMenu()
-  const { data: subscription, isLoading: subLoading } = useSubscription()
   const { user, isLoading: userLoading } = useUser()
+  // Funcionário sem billing.me.show não chama /me/subscription (daria 403); o status de
+  // suspensão dele continua vindo do /me (user.subscriptionStatus).
+  const canSeeSubscription = !!user?.permissions?.includes(Permission.BillingMeShow)
+  const { data: subscription, isLoading: subLoading } = useSubscription(canSeeSubscription)
 
   if (!userLoading && user?.subscriptionStatus === 'suspended') {
     return <RegularizacaoView />

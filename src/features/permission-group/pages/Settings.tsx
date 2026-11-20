@@ -8,7 +8,6 @@ import { PermissionGroupCollapsible } from "@/features/permission-group/componen
 import { useFetchPermissionsByModules } from "@/features/permission-group/hooks/use-fetch-permissions-by-modules"
 import { useUpdatePermissionGroupPermissions } from "@/features/permission-group/hooks/use-update-permission-group-permissions"
 import {
-  getModuleActiveValue,
   getPermissionValue,
   groupPermissionsByContext,
   buildPermissionUpdatesPerGroup,
@@ -31,14 +30,13 @@ export default function Settings() {
   const { mutateAsync: updatePermissions } = useUpdatePermissionGroupPermissions()
 
   // pendingChanges: `${groupId}-${permission}` (permissão é única entre módulos).
-  // moduleActiveChanges: `${module}:${groupId}` (o switch "módulo ativo" é por módulo da API).
+  // O switch do módulo é derivado das permissões (ligado = alguma permissão ligada); ele só liga
+  // ou desliga todas as permissões do grupo naquele módulo — nunca envia `active` sozinho.
   const [pendingChanges, setPendingChanges] = useState<Record<string, boolean>>({})
-  const [moduleActiveChanges, setModuleActiveChanges] = useState<Record<string, boolean>>({})
-  const hasChanges = Object.keys(pendingChanges).length > 0 || Object.keys(moduleActiveChanges).length > 0
+  const hasChanges = Object.keys(pendingChanges).length > 0
 
   useEffect(() => {
     setPendingChanges({})
-    setModuleActiveChanges({})
   }, [selectedAreaID])
 
   const handlePermissionToggle = (groupId: string, permissionId: string, originalValue: boolean) => {
@@ -57,24 +55,24 @@ export default function Settings() {
     })
   }
 
-  const handleModuleActiveToggle = (module: string, groupId: string, originalValue: boolean) => {
-    const key = `${module}:${groupId}`
-    const newValue = !getModuleActiveValue(moduleActiveChanges, key, originalValue)
-
-    setModuleActiveChanges(current => {
+  const handleModuleToggle = (groupId: string, permissions: { permission: string; active: boolean }[], currentlyOn: boolean) => {
+    const target = !currentlyOn
+    setPendingChanges(current => {
       const updatedChanges = { ...current }
-      if (newValue === originalValue) {
-        delete updatedChanges[key]
-      } else {
-        updatedChanges[key] = newValue
-      }
+      permissions.forEach(({ permission, active }) => {
+        const key = `${groupId}-${permission}`
+        if (target === active) {
+          delete updatedChanges[key]
+        } else {
+          updatedChanges[key] = target
+        }
+      })
       return updatedChanges
     })
   }
 
   const handleCancelChanges = () => {
     setPendingChanges({})
-    setModuleActiveChanges({})
   }
 
   // Um PUT por (módulo, grupo) afetado — mesmo payload de antes; só o agrupamento é da tela.
@@ -92,26 +90,27 @@ export default function Settings() {
           return modulePermissions.has(permission)
         }),
       )
-      const moduleActive = Object.fromEntries(
-        Object.entries(moduleActiveChanges)
-          .filter(([key]) => key.startsWith(`${module}:`))
-          .map(([key, value]) => [key.substring(module.length + 1), value]),
-      )
 
       const updates = buildPermissionUpdatesPerGroup({
         pendingChanges: modulePending,
-        moduleActiveChanges: moduleActive,
+        moduleActiveChanges: {},
         permissions: data,
         selectedModule: module,
       })
 
       for (const { groupId, payload } of updates) {
+        const group = data.permissionGroups.find(g => g.id === groupId)
+        const enablesSomething = payload.contexts.some(c => c.permissions.some(p => p.active))
+        // Módulo inativo na API zera qualquer permissão ligada individualmente. Ativa o módulo
+        // antes (a API liga tudo nessa transição) e em seguida grava o estado desejado.
+        if (group && !group.moduleActive && enablesSomething) {
+          await updatePermissions({ permissionGroupId: groupId, payload: { ...payload, active: true }, module })
+        }
         await updatePermissions({ permissionGroupId: groupId, payload, module })
       }
     }
 
     setPendingChanges({})
-    setModuleActiveChanges({})
   }
 
   const boundGetPermissionValue = useCallback(
@@ -191,20 +190,28 @@ export default function Settings() {
               <section key={module} className="space-y-6">
                 {/* Estado Ativo do Módulo por Grupo */}
                 <Card className="p-6">
-                  <h2 className="text-lg font-semibold mb-4">Módulo de {sectionLabel}</h2>
+                  <h2 className="text-lg font-semibold">Módulo de {sectionLabel}</h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Atalho: liga ou desliga todas as permissões abaixo para o grupo. Fica ligado quando há pelo menos uma permissão ligada.
+                  </p>
                   <div className="space-y-3">
-                    {data.permissionGroups.map(group => (
-                      <div key={group.id} className="flex items-center justify-between py-2">
-                        <label htmlFor={`module-active-${module}-${group.id}`} className="text-sm font-medium">
-                          {group.label}
-                        </label>
-                        <Switch
-                          id={`module-active-${module}-${group.id}`}
-                          checked={getModuleActiveValue(moduleActiveChanges, `${module}:${group.id}`, group.moduleActive)}
-                          onCheckedChange={() => handleModuleActiveToggle(module, group.id, group.moduleActive)}
-                        />
-                      </div>
-                    ))}
+                    {data.permissionGroups.map(group => {
+                      const moduleOn = group.permissions.some(p =>
+                        getPermissionValue(pendingChanges, group.id, p.permission, p.active),
+                      )
+                      return (
+                        <div key={group.id} className="flex items-center justify-between py-2">
+                          <label htmlFor={`module-active-${module}-${group.id}`} className="text-sm font-medium">
+                            {group.label}
+                          </label>
+                          <Switch
+                            id={`module-active-${module}-${group.id}`}
+                            checked={moduleOn}
+                            onCheckedChange={() => handleModuleToggle(group.id, group.permissions, moduleOn)}
+                          />
+                        </div>
+                      )
+                    })}
                   </div>
                 </Card>
 
@@ -229,12 +236,12 @@ export default function Settings() {
           {hasChanges && (
             <div className="fixed bottom-0 left-0 right-0 z-50">
               <div className="bg-white/95 backdrop-blur-sm border-t border-gray-200 p-4 shadow-xl">
-                <div className="flex gap-3 justify-center max-w-md mx-auto">
+                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:gap-3 sm:justify-center max-w-md mx-auto">
                   <Button
                     onClick={handleCancelChanges}
                     variant="outline"
                     size="lg"
-                    className="shadow-sm"
+                    className="shadow-sm w-full sm:w-auto"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Cancelar
@@ -242,7 +249,7 @@ export default function Settings() {
                   <Button
                     onClick={handleApplyChanges}
                     size="lg"
-                    className="shadow-sm"
+                    className="shadow-sm w-full sm:w-auto"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     Aplicar Alterações
