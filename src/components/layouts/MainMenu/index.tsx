@@ -135,9 +135,11 @@ export function MainMenu({ className }: MainMenuProps) {
           </div>
 
           {/* Conteúdo do Menu */}
-          <div className="flex flex-col h-full">
+          {/* flex-1 + min-h-0: ocupa só o que sobra abaixo do cabeçalho, então a lista rola e
+              "Minha Empresa" / "Sair" ficam sempre visíveis no rodapé */}
+          <div className="flex flex-col flex-1 min-h-0">
             {/* Conteúdo principal */}
-            <div className="p-4 space-y-6 flex-1 overflow-y-auto">
+            <div className="p-4 space-y-6 flex-1 min-h-0 overflow-y-auto">
               {isLoading ? (
                 <div className="space-y-4">
                   <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
@@ -202,7 +204,7 @@ export function MainMenu({ className }: MainMenuProps) {
 
             {/* Minha Empresa (fixo no rodapé) */}
             {canSeeMinhaEmpresa && (
-              <div className="border-t">
+              <div className="border-t shrink-0">
                 <div className="p-4">
                   <MenuSection title="Minha Empresa" isCollapsed={isCollapsed}>
                     {canSeePermissoes && (
@@ -221,7 +223,7 @@ export function MainMenu({ className }: MainMenuProps) {
             )}
 
             {/* Botão Sair fixo no final */}
-            <div className="p-4 pt-4">
+            <div className="p-4 pt-4 shrink-0">
               <MenuItem
                 href="#"
                 icon={<LogOut className="h-full w-full" />}
