@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { ArrowLeft, Edit2, Plus, Trash2, Pencil, FileText } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,10 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('pt-BR')
 export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  // Volta pra tela de onde a pessoa veio (Financeiro, Clientes, um pedido…). Sem histórico
+  // interno (abriu o link direto), cai na lista de clientes.
+  const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate('/apliques/clientes'))
   const { data: customer, isLoading } = useFetchCustomer(id ?? null)
   const { mutate: updateMutate, isPending: isUpdating } = useUpdateCustomer()
   const { mutate: addPayment, isPending: isAdding } = useAddPayment()
@@ -67,7 +71,7 @@ export default function CustomerDetail() {
     return (
       <div className="container mx-auto px-4 py-6">
         <p className="text-muted-foreground">Cliente não encontrado.</p>
-        <Button variant="ghost" onClick={() => navigate('/apliques/clientes')} className="mt-4">
+        <Button variant="ghost" onClick={goBack} className="mt-4">
           <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
         </Button>
       </div>
@@ -83,7 +87,7 @@ export default function CustomerDetail() {
       <div className="container mx-auto px-4 py-6 max-w-2xl space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/apliques/clientes')}>
+          <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold flex-1">{customer.name}</h1>

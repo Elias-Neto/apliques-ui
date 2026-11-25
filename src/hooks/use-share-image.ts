@@ -19,6 +19,11 @@ const captureBlob = async (node: HTMLElement): Promise<Blob> => {
   return response.blob()
 }
 
+// Fechar a folha de compartilhamento do celular sem enviar rejeita share() com AbortError.
+// Não é falha: a pessoa só desistiu — então não mostra erro.
+const isUserCancel = (error: unknown): boolean =>
+  error instanceof DOMException && error.name === 'AbortError'
+
 export const useShareImage = (ref: RefObject<HTMLElement>, fileName: string) => {
   const [isProcessing, setIsProcessing] = useState(false)
   const { toast } = useToast()
@@ -35,7 +40,8 @@ export const useShareImage = (ref: RefObject<HTMLElement>, fileName: string) => 
         downloadBlob(blob, fileName)
         toast({ title: "Imagem baixada", description: "Agora você pode enviar a imagem no WhatsApp." })
       }
-    } catch {
+    } catch (error) {
+      if (isUserCancel(error)) return
       toast({ title: "Erro ao gerar imagem", variant: "destructive" })
     } finally {
       setIsProcessing(false)
